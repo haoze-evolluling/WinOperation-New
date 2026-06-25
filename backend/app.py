@@ -70,6 +70,7 @@ def toggle_service(name):
 @app.route("/api/registry/read/<path:reg_path>", methods=["GET"])
 def registry_read(reg_path):
     from modules.registry import read_registry
+    reg_path = reg_path.replace("/", "\\")
     key_name = request.args.get("key", "")
     value = read_registry(reg_path, key_name)
     return ok(value)
@@ -78,6 +79,7 @@ def registry_read(reg_path):
 @app.route("/api/registry/write/<path:reg_path>", methods=["POST"])
 def registry_write(reg_path):
     from modules.registry import write_registry
+    reg_path = reg_path.replace("/", "\\")
     payload = request.json or {}
     result = write_registry(reg_path, payload.get("key", ""), payload.get("value", ""))
     return ok(result)

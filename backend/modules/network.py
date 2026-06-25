@@ -6,7 +6,7 @@ def get_network_info():
         SELECT Description, IPAddress 
         FROM Win32_NetworkAdapterConfiguration 
         WHERE IPEnabled = TRUE
-    """)
+    """.strip())
     result = []
     for a in adapters:
         ips = a.get("IPAddress") or []
