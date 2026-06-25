@@ -134,6 +134,26 @@ def registry_batch_write():
     return ok(result)
 
 
+@app.route("/api/registry/export", methods=["POST"])
+def registry_export():
+    from modules.registry import export_registry
+    payload = request.json or {}
+    reg_path = payload.get("path", "")
+    result = export_registry(reg_path)
+    if result.get("status") == "error":
+        return ok(result)
+    from flask import Response
+    return Response(result["content"], mimetype="text/plain")
+
+
+@app.route("/api/registry/import", methods=["POST"])
+def registry_import():
+    from modules.registry import import_registry
+    reg_text = request.data.decode("utf-8") if request.data else ""
+    result = import_registry(reg_text)
+    return ok(result)
+
+
 # ---- 网络 ----
 @app.route("/api/network/info", methods=["GET"])
 def network_info():

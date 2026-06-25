@@ -1,4 +1,4 @@
-from utils.registry import read_key, write_key, list_subkeys, tree_subkeys
+from utils.registry import read_key, write_key, list_subkeys, tree_subkeys, export_reg, import_reg
 import win32con
 
 
@@ -125,3 +125,26 @@ def batch_write_registry(entries):
                 "error": str(e),
             })
     return {"results": results}
+
+
+def export_registry(reg_path):
+    try:
+        content = export_reg(reg_path)
+        return {
+            "status": "ok",
+            "path": reg_path,
+            "content": content,
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
+
+
+def import_registry(reg_text):
+    try:
+        result = import_reg(reg_text)
+        return {
+            "status": "ok",
+            **result,
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}

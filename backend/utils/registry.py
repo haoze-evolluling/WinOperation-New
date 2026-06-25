@@ -1,5 +1,6 @@
 import win32api
 import win32con
+import re
 
 HKEY_MAP = {
     "HKLM": win32con.HKEY_LOCAL_MACHINE,
@@ -94,3 +95,102 @@ def tree_subkeys(reg_path, max_depth=2):
         }
 
     return _build(node_path, max_depth)
+
+
+def export_reg(reg_path):
+    info = list_subkeys(reg_path)
+    lines = ["Windows Registry Editor Version 5.00", ""]
+    section = f"[{_reg_path_to_string(reg_path)}]"
+    lines.append(section)
+    for v in info["values"]:
+        name = v["name"]
+        data = v["data"]
+        reg_type = v["type_int"]
+        if reg_type == win32con.REG_SZ:
+            lines.append(f'"{name}"="{data}"')
+        elif reg_type == win32con.REG_DWORD:
+            lines.append(f'"{name}"=dword:{data:08X}')
+        # ponytail: skip REG_BINARY and unknown types per brief; add when needed
+    return "\n".join(lines)
+
+
+def _reg_path_to_string(reg_path):
+    parts = reg_path.split("\\", 1)
+    root_str = parts[0].upper()
+    rest = parts[1] if len(parts) > 1 else ""
+    abbrev_to_full = {
+        "HKLM": "HKEY_LOCAL_MACHINE",
+        "HKCU": "HKEY_CURRENT_USER",
+        "HKCR": "HKEY_CLASSES_ROOT",
+        "HKU": "HKEY_USERS",
+        "HKCC": "HKEY_CURRENT_CONFIG",
+    }
+    root_name = abbrev_to_full.get(root_str, root_str)
+    if rest:
+        return f"{root_name}\\{rest}"
+    return root_name
+
+
+def import_reg(reg_text):
+    imported = 0
+    failed = []
+    errors = []
+    current_path = None
+
+    root_to_abbrev = {
+        "HKEY_CLASSES_ROOT": "HKCR",
+        "HKEY_CURRENT_USER": "HKCU",
+        "HKEY_LOCAL_MACHINE": "HKLM",
+        "HKEY_USERS": "HKU",
+        "HKEY_CURRENT_CONFIG": "HKCC",
+    }
+
+    for line in reg_text.splitlines():
+        line = line.strip()
+        if not line or line.startswith("Windows Registry Editor"):
+            continue
+        section_match = re.match(r'^\[(.+)\]$', line)
+        if section_match:
+            full_path = section_match.group(1)
+            parts = full_path.split("\\", 1)
+            root_str = parts[0].upper()
+            abbrev = root_to_abbrev.get(root_str)
+            if abbrev is None:
+                errors.append(f"不支持的注册表根: {root_str}")
+                current_path = None
+                continue
+            rest = parts[1] if len(parts) > 1 else ""
+            current_path = f"{abbrev}\\{rest}" if rest else abbrev
+            continue
+
+        if current_path is None:
+            continue
+
+        val_match = re.match(r'^"([^"]+)"="(.+)"$', line)
+        if val_match:
+            name = val_match.group(1)
+            data = val_match.group(2)
+            try:
+                write_key(current_path, name, data, win32con.REG_SZ)
+                imported += 1
+            except Exception as e:
+                failed.append(name)
+                errors.append(str(e))
+            continue
+
+        dword_match = re.match(r'^"([^"]+)"=dword:([0-9a-fA-F]+)$', line)
+        if dword_match:
+            name = dword_match.group(1)
+            hex_str = dword_match.group(2)
+            try:
+                data = int(hex_str, 16)
+                write_key(current_path, name, data, win32con.REG_DWORD)
+                imported += 1
+            except Exception as e:
+                failed.append(name)
+                errors.append(str(e))
+            continue
+
+        errors.append(f"无法解析行: {line}")
+
+    return {"imported": imported, "failed": failed, "errors": errors}
