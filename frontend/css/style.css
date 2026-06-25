@@ -32,6 +32,14 @@
 
     --transition-fast: 0.15s ease;
     --transition-normal: 0.25s ease;
+
+    --glass-bg: rgba(255, 255, 255, 0.62);
+    --glass-bg-strong: rgba(255, 255, 255, 0.82);
+    --glass-border: rgba(255, 255, 255, 0.35);
+    --glass-border-subtle: rgba(255, 255, 255, 0.18);
+    --glass-blur: 22px;
+    --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.06), 0 0 1px rgba(0, 0, 0, 0.08);
+    --glass-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.10), 0 0 1px rgba(0, 0, 0, 0.12);
 }
 
 [data-theme="dark"] {
@@ -53,6 +61,14 @@
     --shadow-card: 0 2px 8px rgba(0, 0, 0, 0.20), 0 0 1px rgba(0, 0, 0, 0.30);
     --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.30), 0 0 1px rgba(0, 0, 0, 0.35);
     --shadow-sidebar: 4px 0 24px rgba(0, 0, 0, 0.20);
+
+    --glass-bg: rgba(48, 48, 48, 0.62);
+    --glass-bg-strong: rgba(48, 48, 48, 0.82);
+    --glass-border: rgba(255, 255, 255, 0.10);
+    --glass-border-subtle: rgba(255, 255, 255, 0.05);
+    --glass-blur: 22px;
+    --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.25), 0 0 1px rgba(0, 0, 0, 0.30);
+    --glass-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 1px rgba(0, 0, 0, 0.40);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
