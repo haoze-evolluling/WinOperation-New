@@ -1,122 +1,81 @@
-# Task 3: 填充 5 个模块（模拟数据）
+# Task 3 Brief: 实现 system_info.py（真实系统信息）
 
-## Context
-这是 Windows 系统优化工具项目的 Task 3。你需要创建 5 个后端模块文件，每个暴露被 app.py 导入的接口函数，返回模拟数据。
+**Goal:** 将 `backend/modules/system_info.py` 从模拟数据替换为 WMI 真实查询，保持与前端兼容的返回结构。
 
-## 需求
+**Files:**
+- Modify: `backend/modules/system_info.py`
 
-按以下内容逐字创建 5 个文件：
+**Interfaces:**
+- Consumes: `utils.wmi.query(wql)` — returns list[dict]
+- Produces: `get_system_info() -> dict` with keys: `cpu`, `memory`, `disk`, `uptime`
 
-### 3a: `backend/modules/system_info.py`
+**Return Structure (must match existing frontend expectations):**
+```python
+{
+    "cpu": {"name": str, "cores": int, "usage": int},
+    "memory": {"total_gb": float, "used_gb": float, "percent": float},
+    "disk": [{"drive": str, "total_gb": float, "free_gb": float, "percent": float}, ...],
+    "uptime": str,  # format: "X days, HH:MM:SS"
+}
+```
+
+**Implementation:**
 
 ```python
+from utils.wmi import query as wmi_query
+
+
 def get_system_info():
+    cpu_rows = wmi_query("SELECT Name, NumberOfCores, LoadPercentage FROM Win32_Processor")
+    cpu = {
+        "name": cpu_rows[0]["Name"] if cpu_rows else "Unknown",
+        "cores": int(cpu_rows[0]["NumberOfCores"]) if cpu_rows else 0,
+        "usage": int(cpu_rows[0]["LoadPercentage"]) if cpu_rows else 0,
+    }
+
+    os_rows = wmi_query("SELECT TotalVisibleMemorySize, FreePhysicalMemory FROM Win32_OperatingSystem")
+    if os_rows:
+        total_kb = int(os_rows[0]["TotalVisibleMemorySize"])
+        free_kb = int(os_rows[0]["FreePhysicalMemory"])
+        total_gb = round(total_kb / (1024 * 1024), 1)
+        used_gb = round((total_kb - free_kb) / (1024 * 1024), 1)
+        percent = round((total_kb - free_kb) / total_kb * 100, 1)
+    else:
+        total_gb = used_gb = percent = 0
+
+    disk_rows = wmi_query("SELECT DeviceID, Size, FreeSpace FROM Win32_LogicalDisk WHERE DriveType=3")
+    disk = []
+    for row in disk_rows:
+        total_gb_disk = round(int(row["Size"]) / (1024 ** 3), 1)
+        free_gb_disk = round(int(row["FreeSpace"]) / (1024 ** 3), 1)
+        disk.append({
+            "drive": row["DeviceID"],
+            "total_gb": total_gb_disk,
+            "free_gb": free_gb_disk,
+            "percent": round((1 - int(row["FreeSpace"]) / int(row["Size"])) * 100, 1),
+        })
+
+    import ctypes
+    uptime_ms = ctypes.windll.kernel32.GetTickCount64()
+    uptime_sec = uptime_ms / 1000
+    days = int(uptime_sec // 86400)
+    hours = int((uptime_sec % 86400) // 3600)
+    minutes = int((uptime_sec % 3600) // 60)
+    seconds = int(uptime_sec % 60)
+    uptime = f"{days} days, {hours:02d}:{minutes:02d}:{seconds:02d}"
+
     return {
-        "cpu": {"name": "Intel Core i7-10700K", "cores": 8, "usage": 45},
-        "memory": {"total_gb": 32, "used_gb": 12.5, "percent": 39.1},
-        "disk": [
-            {"drive": "C:", "total_gb": 512, "free_gb": 234, "percent": 54.3},
-            {"drive": "D:", "total_gb": 1024, "free_gb": 800, "percent": 21.9},
-        ],
-        "uptime": "3 days, 14:22:05",
+        "cpu": cpu,
+        "memory": {"total_gb": total_gb, "used_gb": used_gb, "percent": percent},
+        "disk": disk,
+        "uptime": uptime,
     }
 ```
 
-### 3b: `backend/modules/cleanup.py`
+**Validation:**
+- First verify current mock returns correct structure: `python -c "from modules.system_info import get_system_info; import json; print(json.dumps(get_system_info(), indent=2))"`
+- Then verify real data: same command after modification
 
-```python
-def do_cleanup_temp(payload):
-    return {
-        "cleaned_paths": ["C:\\Users\\Acer\\AppData\\Local\\Temp"],
-        "freed_mb": 128,
-        "message": "模拟清理完成",
-        "requires_admin": False,
-    }
-```
+**Report file:** `docs/superpowers/sdd/task-3-report.md`
 
-### 3c: `backend/modules/performance.py`
-
-```python
-def get_services():
-    return {
-        "services": [
-            {"name": "wuauserv", "display_name": "Windows Update", "status": "running"},
-            {"name": "WinDefend", "display_name": "Windows Defender", "status": "running"},
-            {"name": "Schedule", "display_name": "Task Scheduler", "status": "running"},
-        ]
-    }
-
-
-def toggle_service(name, action):
-    return {
-        "name": name,
-        "action": action,
-        "message": f"模拟{'启动' if action == 'start' else '停止'}服务 {name}",
-        "requires_admin": True,
-    }
-```
-
-### 3d: `backend/modules/registry.py`
-
-```python
-def read_registry(reg_path, key_name=""):
-    return {
-        "path": reg_path,
-        "key": key_name,
-        "value": "模拟注册表值",
-        "type": "REG_SZ",
-        "requires_admin": False,
-    }
-
-
-def write_registry(reg_path, key_name, value):
-    return {
-        "path": reg_path,
-        "key": key_name,
-        "value": value,
-        "message": "模拟写入注册表",
-        "requires_admin": True,
-    }
-```
-
-### 3e: `backend/modules/network.py`
-
-```python
-def get_network_info():
-    return {
-        "adapters": [
-            {
-                "name": "Wi-Fi",
-                "ip": "192.168.1.100",
-                "dns": ["223.5.5.5", "114.114.114.114"],
-                "speed": "867 Mbps",
-            },
-            {
-                "name": "Ethernet",
-                "ip": "192.168.1.101",
-                "dns": ["223.5.5.5"],
-                "speed": "1 Gbps",
-            },
-        ]
-    }
-```
-
-## 验证
-写入文件后，运行：
-```powershell
-cd backend; python -c "
-import modules.system_info, modules.cleanup, modules.performance, modules.registry, modules.network
-print('all modules import ok')
-"
-```
-
-## 报告
-完成后写入报告文件 `docs/superpowers/sdd/task-3-report.md`，包含：
-- 5 个文件路径
-- 导入验证结果
-- 任何问题
-
-## 注意
-- 不要修改 app.py 或其他文件
-- 骨架阶段用模拟数据，pywin32 实现在后续迭代
-- 提交：`git add backend/modules/*.py && git commit -m "feat: Task 3 - 5 个模块模拟数据"`
+**Report contract:** Return status, commits, test results, and any concerns.

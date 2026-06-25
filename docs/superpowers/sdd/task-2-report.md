@@ -1,19 +1,4 @@
-# Task 2 报告
-
-## 文件路径
-
-`C:\Users\Acer\WinOperation-New\backend\app.py`
-
-## 行数
-
-83 行
-
-## 语法验证结果
-
-```
-syntax ok
-```
-
-## 问题
-
-无。
+- Status: DONE
+- Commits: 13b669b
+- Test: python -c "import ast; ast.parse(open('backend/utils/registry.py', encoding='utf-8').read()); print('registry.py ok')"; python -c "import ast; ast.parse(open('backend/utils/wmi.py', encoding='utf-8').read()); print('wmi.py ok')" — both passed
+- Concerns: None

@@ -1,56 +1,76 @@
-# Task 5: 验证可运行
+# Task 5 Brief: 实现 performance.py（真实服务管理）
 
-## Context
-这是 Windows 系统优化工具项目的 Task 5。你需要安装依赖、启动 Flask 服务，并验证所有 API 端点可正常返回数据。
+**Goal:** 将 `backend/modules/performance.py` 从模拟数据替换为 win32service 真实服务管理。
 
-## 需求
+**Files:**
+- Modify: `backend/modules/performance.py`
 
-### Step 1: 安装依赖
-```powershell
-cd C:\Users\Acer\WinOperation-New\backend
-pip install -r requirements.txt
+**Interfaces:**
+- Consumes: `win32service`, `win32serviceutil` (pywin32)
+- Produces: `get_services() -> dict` 和 `toggle_service(name, action) -> dict`
+
+**Return Structures:**
+```python
+# get_services()
+{"services": [{"name": str, "display_name": str, "status": str}, ...]}
+
+# toggle_service()
+{"name": str, "action": str, "message": str}
 ```
 
-### Step 2: 启动服务（后台运行）
-```powershell
-cd C:\Users\Acer\WinOperation-New\backend
-Start-Process python -ArgumentList "app.py" -WindowStyle Hidden
-Start-Sleep -Seconds 2
+**Status mapping:**
+- SERVICE_STOPPED → "stopped"
+- SERVICE_START_PENDING → "starting"
+- SERVICE_RUNNING → "running"
+- SERVICE_STOP_PENDING → "stopping"
+- SERVICE_PAUSED → "paused"
+- default → "unknown"
+
+**Implementation:**
+
+```python
+import win32service
+import win32serviceutil
+
+
+SERVICE_STATES = {
+    win32service.SERVICE_STOPPED: "stopped",
+    win32service.SERVICE_START_PENDING: "starting",
+    win32service.SERVICE_RUNNING: "running",
+    win32service.SERVICE_STOP_PENDING: "stopping",
+    win32service.SERVICE_PAUSED: "paused",
+}
+
+
+def get_services():
+    scm = win32service.OpenSCManager(None, None, win32service.SC_MANAGER_ENUMERATE_SERVICE)
+    try:
+        services = win32service.EnumServicesStatus(scm, win32service.SERVICE_WIN32, win32service.SERVICE_STATE_ALL)
+        result = []
+        for svc in services:
+            name = svc[0]
+            display = svc[1]
+            status_code = svc[2][1]
+            status = SERVICE_STATES.get(status_code, "unknown")
+            result.append({"name": name, "display_name": display, "status": status})
+        return {"services": result}
+    finally:
+        win32service.CloseServiceHandle(scm)
+
+
+def toggle_service(name, action):
+    if action == "start":
+        win32serviceutil.StartService(name)
+        msg = f"已启动服务 {name}"
+    else:
+        win32serviceutil.StopService(name)
+        msg = f"已停止服务 {name}"
+    return {"name": name, "action": action, "message": msg}
 ```
 
-### Step 3: 测试所有 API 端点
+**Validation:**
+- Run: `python -c "from modules.performance import get_services; import json; svcs = get_services()['services']; print(f'found {len(svcs)} services'); print(json.dumps(svcs[:3], indent=2, ensure_ascii=False))"`
 
-依次运行以下命令验证每个端点：
+**Report file:** `docs/superpowers/sdd/task-5-report.md`
 
-```powershell
-# 系统信息
-Invoke-RestMethod -Uri "http://localhost:5000/api/system-info" -Method Get
-
-# 系统清理
-Invoke-RestMethod -Uri "http://localhost:5000/api/cleanup/temp-files" -Method Post -ContentType "application/json" -Body "{}"
-
-# 性能 - 获取服务列表
-Invoke-RestMethod -Uri "http://localhost:5000/api/performance/services" -Method Get
-
-# 注册表读取
-Invoke-RestMethod -Uri "http://localhost:5000/api/registry/read/SOFTWARE%5CMicrosoft?key=test" -Method Get
-
-# 网络信息
-Invoke-RestMethod -Uri "http://localhost:5000/api/network/info" -Method Get
-```
-
-### Step 4: 停止服务
-```powershell
-Stop-Process -Name python -Force -ErrorAction SilentlyContinue
-```
-
-## 报告
-完成后写入报告文件 `docs/superpowers/sdd/task-5-report.md`，包含：
-- 每个 API 端点的测试结果
-- 所有端点是否都返回了正确的 JSON 格式 `{"status": "ok", ...}`
-- 任何错误或问题
-
-## 注意
-- 不要修改代码文件
-- 只做测试和报告
-- 如果发现 API 返回错误，记录具体错误信息
+**Report contract:** Return status, commits, test results, and any concerns.

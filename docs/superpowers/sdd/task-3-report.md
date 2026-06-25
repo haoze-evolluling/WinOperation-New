@@ -1,19 +1,6 @@
-# Task 3 Report
+# Task 3 Report: 实现 system_info.py（真实系统信息）
 
-## 5 个文件路径
-
-- `backend/modules/system_info.py`
-- `backend/modules/cleanup.py`
-- `backend/modules/performance.py`
-- `backend/modules/registry.py`
-- `backend/modules/network.py`
-
-## 导入验证结果
-
-```
-all modules import ok
-```
-
-## 问题
-
-无。所有 5 个模块按 brief 逐字创建，导入验证通过，已提交 `b31f927`。
+- Status: DONE
+- Commits: e9364fc
+- Test: `python -c "from modules.system_info import get_system_info; import json; print(json.dumps(get_system_info(), indent=2))"` — returned real system data with correct structure (cpu, memory, disk, uptime keys all present)
+- Concerns: None

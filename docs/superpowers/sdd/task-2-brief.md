@@ -1,111 +1,108 @@
-# Task 2: 创建 Flask 入口 app.py
+# Task 2 Brief: 创建 utils/registry.py 和 utils/wmi.py
 
-## Context
-这是 Windows 系统优化工具项目的 Task 2。你需要创建 Flask 后端入口文件，注册所有 API 路由，并托管前端静态文件。
+**Goal:** 抽取工具层，统一注册表读写和 WMI 查询，供后续模块复用。
 
-## 需求
+**Files:**
+- Create: `backend/utils/registry.py`
+- Create: `backend/utils/wmi.py`
 
-创建 `backend/app.py`，内容如下（**逐字使用，不要修改**）：
+**Global Constraints:**
+- 只使用 stdlib + pywin32，不新增第三方依赖
+- 统一 JSON 响应格式：`{"status": "ok|error", "data": ..., "error": ...}`
+
+---
+
+### utils/registry.py
+
+**Purpose:** 封装 win32api 注册表操作，提供简洁的 read/write 接口。
+
+**Interfaces Produced:**
+- `read_key(reg_path, value_name="") -> (data, reg_type)` — 读取注册表值，返回 (数据, 类型)
+- `write_key(reg_path, value_name, data, reg_type=win32con.REG_SZ)` — 写入注册表值
+
+**Implementation:**
 
 ```python
-from flask import Flask, jsonify, request, send_from_directory
-import os
+import win32api
+import win32con
 
-app = Flask(__name__)
-
-BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-FRONTEND_DIR = os.path.join(BASE_DIR, "frontend")
-
-
-@app.route("/")
-def index():
-    return send_from_directory(FRONTEND_DIR, "index.html")
+HKEY_MAP = {
+    "HKLM": win32con.HKEY_LOCAL_MACHINE,
+    "HKCU": win32con.HKEY_CURRENT_USER,
+    "HKCR": win32con.HKEY_CLASSES_ROOT,
+    "HKU": win32con.HKEY_USERS,
+    "HKCC": win32con.HKEY_CURRENT_CONFIG,
+}
 
 
-@app.route("/<path:path>")
-def static_files(path):
-    return send_from_directory(FRONTEND_DIR, path)
+def _parse_root(reg_path):
+    parts = reg_path.split("\\", 1)
+    root_str = parts[0].upper()
+    sub_path = parts[1] if len(parts) > 1 else ""
+    root = HKEY_MAP.get(root_str)
+    if root is None:
+        raise ValueError(f"不支持的注册表根: {root_str}")
+    return root, sub_path
 
 
-def ok(data=None):
-    return jsonify({"status": "ok", "data": data})
+def read_key(reg_path, value_name=""):
+    root, sub_path = _parse_root(reg_path)
+    key = None
+    try:
+        key = win32api.RegOpenKeyEx(root, sub_path, 0, win32con.KEY_READ)
+        data, reg_type = win32api.RegQueryValueEx(key, value_name)
+        return data, reg_type
+    finally:
+        if key:
+            win32api.RegCloseKey(key)
 
 
-def error(message):
-    return jsonify({"status": "error", "error": message})
-
-
-# ---- 系统信息 ----
-@app.route("/api/system-info", methods=["GET"])
-def system_info():
-    from modules.system_info import get_system_info
-    return ok(get_system_info())
-
-
-# ---- 系统清理 ----
-@app.route("/api/cleanup/temp-files", methods=["POST"])
-def cleanup_temp_files():
-    from modules.cleanup import do_cleanup_temp
-    result = do_cleanup_temp(request.json or {})
-    return ok(result)
-
-
-# ---- 性能调优 ----
-@app.route("/api/performance/services", methods=["GET"])
-def get_services():
-    from modules.performance import get_services
-    return ok(get_services())
-
-
-@app.route("/api/performance/services/<name>", methods=["POST"])
-def toggle_service(name):
-    from modules.performance import toggle_service
-    action = (request.json or {}).get("action", "start")
-    result = toggle_service(name, action)
-    return ok(result)
-
-
-# ---- 注册表 ----
-@app.route("/api/registry/read/<path:reg_path>", methods=["GET"])
-def registry_read(reg_path):
-    from modules.registry import read_registry
-    key_name = request.args.get("key", "")
-    value = read_registry(reg_path, key_name)
-    return ok(value)
-
-
-@app.route("/api/registry/write/<path:reg_path>", methods=["POST"])
-def registry_write(reg_path):
-    from modules.registry import write_registry
-    payload = request.json or {}
-    result = write_registry(reg_path, payload.get("key", ""), payload.get("value", ""))
-    return ok(result)
-
-
-# ---- 网络 ----
-@app.route("/api/network/info", methods=["GET"])
-def network_info():
-    from modules.network import get_network_info
-    return ok(get_network_info())
-
-
-if __name__ == "__main__":
-    app.run(debug=True, host="0.0.0.0", port=5000)
+def write_key(reg_path, value_name, data, reg_type=win32con.REG_SZ):
+    root, sub_path = _parse_root(reg_path)
+    key = None
+    try:
+        key = win32api.RegCreateKey(root, sub_path)
+        win32api.RegSetValueEx(key, value_name, 0, reg_type, data)
+    finally:
+        if key:
+            win32api.RegCloseKey(key)
 ```
 
-## 验证
-写入文件后，运行：
-```powershell
-cd backend; python -c "import ast; ast.parse(open('app.py').read()); print('syntax ok')"
+**Validation:**
+- Run: `python -c "import ast; ast.parse(open('utils/registry.py', encoding='utf-8').read()); print('ok')"`
+
+---
+
+### utils/wmi.py
+
+**Purpose:** 封装 WMI COM 查询，统一返回 list[dict]。
+
+**Interfaces Produced:**
+- `query(wql) -> list[dict]` — 执行 WQL 查询，返回字典列表
+
+**Implementation:**
+
+```python
+import win32com.client
+
+
+def query(wql):
+    obj = win32com.client.GetObject("winmgmts:\\\\.\\root\\cimv2")
+    cols = None
+    results = []
+    for item in obj.ExecQuery(wql):
+        if cols is None:
+            cols = [p.name for p in item.Properties_]
+        row = {c: getattr(item, c, None) for c in cols}
+        results.append(row)
+    return results
 ```
 
-## 报告
-完成后写入报告文件 `docs/superpowers/sdd/task-2-report.md`，包含：
-- 文件路径和行数
-- 语法验证结果
-- 任何问题
+**Validation:**
+- Run: `python -c "import ast; ast.parse(open('utils/wmi.py', encoding='utf-8').read()); print('ok')"`
 
-## 注意
-- 不要修改其他文件
-- 只做这个任务
-- 提交：`git add backend/app.py && git commit -m "feat: Task 2 - Flask 入口 app.py"`
+---
+
+**Report file:** `docs/superpowers/sdd/task-2-report.md`
+
+**Report contract:** Return status, commits, test results, and any concerns.
