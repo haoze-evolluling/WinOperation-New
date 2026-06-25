@@ -143,14 +143,24 @@ async function loadPerformance() {
     const data = await api("/api/performance/services");
     const container = document.getElementById("performance-content");
     if (data.status !== "ok") { container.textContent = JSON.stringify(data); return; }
-    let html = `<table><tr><th>服务名</th><th>显示名称</th><th>状态</th><th>操作</th></tr>`;
+    container.innerHTML = '<div class="service-cards"></div>';
+    const grid = container.querySelector(".service-cards");
     data.data.services.forEach(s => {
-        html += `<tr><td data-label="服务名">${s.name}</td><td data-label="显示名称">${s.display_name}</td><td data-label="状态">${s.status}</td>
-            <td data-label="操作"><button class="btn btn-primary" onclick="toggleService('${s.name}', 'start')">启动</button>
-            <button class="btn btn-danger" onclick="toggleService('${s.name}', 'stop')">停止</button></td></tr>`;
+        const card = document.createElement("div");
+        card.className = "service-card";
+        card.innerHTML = `
+            <div class="service-card-header">
+                <span class="service-card-name">${s.name}</span>
+                <span class="service-card-status">${s.status}</span>
+            </div>
+            <div class="service-card-meta">${s.display_name}</div>
+            <div class="service-card-actions">
+                <button class="btn btn-primary" onclick="toggleService('${s.name}', 'start')">启动</button>
+                <button class="btn btn-danger" onclick="toggleService('${s.name}', 'stop')">停止</button>
+            </div>
+        `;
+        grid.appendChild(card);
     });
-    html += "</table>";
-    container.innerHTML = html;
 }
 
 async function toggleService(name, action) {

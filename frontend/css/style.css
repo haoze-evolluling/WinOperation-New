@@ -325,43 +325,6 @@ td { background: var(--bg-layer1); color: var(--text-secondary); }
 
 tr:last-child td { border-bottom: none; }
 
-@media (max-width: 768px) {
-    #performance-content table, #performance-content thead { display: none; }
-    #performance-content tr {
-        display: block;
-        margin-bottom: 16px;
-        background: var(--bg-layer1);
-        border: 1px solid var(--border-subtle);
-        border-radius: var(--radius-lg);
-        box-shadow: var(--shadow-card);
-        padding: 16px;
-    }
-    #performance-content td {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: 100%;
-        padding: 8px 0;
-        border-bottom: 1px solid var(--border-subtle);
-        text-align: right;
-    }
-    #performance-content td::before {
-        content: attr(data-label);
-        font-weight: 600;
-        color: var(--accent);
-        text-transform: uppercase;
-        font-size: 0.8em;
-        letter-spacing: 0.04em;
-        text-align: left;
-        flex-shrink: 0;
-        margin-right: 12px;
-    }
-    #performance-content td:last-child {
-        border-bottom: none;
-        justify-content: flex-end;
-    }
-}
-
 .reg-layout {
     display: flex;
     gap: 16px;
@@ -553,4 +516,53 @@ tr:last-child td { border-bottom: none; }
 }
 .result-list-item {
     margin: 4px 0;
+}
+
+.service-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+    gap: 12px;
+    margin-top: 16px;
+}
+.service-card {
+    background: var(--bg-layer1);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    padding: 16px;
+    box-shadow: var(--shadow-card);
+    transition: all var(--transition-fast);
+}
+.service-card:hover {
+    box-shadow: var(--shadow-hover);
+    transform: translateY(-1px);
+}
+.service-card-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-bottom: 8px;
+}
+.service-card-name {
+    font-weight: 500;
+    color: var(--text-primary);
+    font-size: 1em;
+}
+.service-card-status {
+    font-size: 0.8em;
+    font-weight: 600;
+    text-transform: uppercase;
+    color: var(--accent);
+    background: var(--accent-light);
+    padding: 2px 8px;
+    border-radius: var(--radius-sm);
+}
+.service-card-meta {
+    color: var(--text-secondary);
+    font-size: 0.85em;
+    margin-bottom: 12px;
+}
+.service-card-actions {
+    display: flex;
+    gap: 8px;
 }
