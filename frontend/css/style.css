@@ -339,6 +339,19 @@ tr:last-child td { border-bottom: none; }
 .reg-sidebar input {
     width: 100%;
     margin-bottom: 8px;
+    padding: 8px 12px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--border-standard);
+    background: var(--bg-input);
+    color: var(--text-primary);
+    font-family: inherit;
+    font-size: 0.9em;
+    outline: none;
+    transition: all var(--transition-fast);
+}
+.reg-sidebar input:focus {
+    border-color: var(--accent);
+    box-shadow: 0 0 0 2px var(--border-focus);
 }
 .reg-tree {
     margin-top: 8px;
@@ -382,16 +395,6 @@ tr:last-child td { border-bottom: none; }
     margin-bottom: 12px;
     color: var(--accent);
 }
-.reg-values-table {
-    width: 100%;
-    border-collapse: separate;
-    border-spacing: 0;
-    margin-top: 0;
-    border-radius: var(--radius-lg);
-    overflow: hidden;
-    box-shadow: var(--shadow-card);
-    border: 1px solid var(--border-subtle);
-}
 .reg-write-form {
     display: flex;
     gap: 8px;
@@ -421,31 +424,6 @@ tr:last-child td { border-bottom: none; }
     background: var(--accent-light);
     color: var(--accent);
 }
-.reg-values-table th,
-.reg-values-table td {
-    padding: 12px 16px;
-    text-align: left;
-    border-bottom: 1px solid var(--border-subtle);
-    font-size: 0.9em;
-}
-.reg-values-table th {
-    background: var(--bg-layer2);
-    color: var(--accent);
-    font-weight: 600;
-    text-transform: uppercase;
-    font-size: 0.8em;
-    letter-spacing: 0.04em;
-}
-.reg-values-table td {
-    background: var(--bg-layer1);
-    color: var(--text-secondary);
-}
-.reg-values-table tr:last-child td {
-    border-bottom: none;
-}
-.reg-values-table tr:hover td {
-    background: var(--accent-light);
-}
 
 .btn-sm {
     padding: 4px 12px;
@@ -454,18 +432,20 @@ tr:last-child td { border-bottom: none; }
 
 .btn-success {
     background: var(--success);
+    color: white;
 }
 .btn-success:hover {
-    background: #0D8A0D;
+    background: #148A14;
     box-shadow: 0 4px 12px rgba(15, 123, 15, 0.25);
 }
 
 .btn-secondary {
-    background: #6B6B6B;
+    background: var(--bg-layer3);
+    color: var(--text-primary);
 }
 .btn-secondary:hover {
-    background: #7E7E7E;
-    box-shadow: 0 4px 12px rgba(107, 107, 107, 0.25);
+    background: var(--border-standard);
+    box-shadow: 0 4px 12px rgba(128, 128, 128, 0.15);
 }
 
 .cleanup-actions {

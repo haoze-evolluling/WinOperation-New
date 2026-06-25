@@ -85,7 +85,7 @@ async function doScanCleanup() {
     const result = await api("/api/cleanup/scan", { method: "POST", body: JSON.stringify({}) });
     const container = document.getElementById("cleanup-result");
     if (result.status !== "ok") { container.innerHTML = `<div class="result-card error"><strong>错误</strong> — ${result.error || '操作失败'}</div>`; return; }
-    renderCleanupCategories(result.data.categories);
+    renderCleanupCategories(result.data);
 }
 
 function renderCleanupCategories(categories) {
@@ -167,8 +167,11 @@ async function loadRegTree() {
     const data = await api(`/api/registry/tree/${encodeURIComponent(basePath)}?depth=2`);
     const container = document.getElementById("reg-tree");
     if (data.status !== "ok") { container.innerHTML = `<div class="result-card error"><strong>错误</strong> — 加载失败</div>`; return; }
+    if (data.data.status === "error") { container.innerHTML = `<div class="result-card error"><strong>错误</strong> — ${data.data.error}</div>`; return; }
+    const tree = data.data.tree;
+    if (!tree || !tree.children) { container.innerHTML = `<div class="result-card warning"><strong>提示</strong> — 该路径下没有子项</div>`; return; }
     container.innerHTML = "";
-    renderRegTree(data.data, 0, basePath, container);
+    renderRegTree(tree.children, 0, basePath, container);
 }
 
 function renderRegTree(tree, depth, parentPath, container) {
@@ -196,8 +199,9 @@ async function loadRegValues(path) {
     const data = await api(`/api/registry/list/${encodeURIComponent(path)}`);
     const tbody = document.getElementById("reg-values-body");
     if (data.status !== "ok") { tbody.innerHTML = `<tr><td colspan="4">加载失败</td></tr>`; return; }
+    if (data.data.status === "error") { tbody.innerHTML = `<tr><td colspan="4">${data.data.error}</td></tr>`; return; }
     tbody.innerHTML = "";
-    data.data.forEach(item => {
+    (data.data.values || []).forEach(item => {
         const tr = document.createElement("tr");
         tr.innerHTML = `
             <td>${item.name}</td>

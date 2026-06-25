@@ -59,7 +59,7 @@
                 <div class="reg-layout">
                     <div class="reg-sidebar">
                         <input type="text" id="reg-tree-path" placeholder="路径 (如 HKCU\Software)" value="HKCU">
-                        <button class="btn btn-sm" onclick="loadRegTree()">加载</button>
+                        <button class="btn btn-secondary btn-sm" onclick="loadRegTree()">加载</button>
                         <div id="reg-tree" class="reg-tree"></div>
                     </div>
                     <div class="reg-main">
@@ -71,7 +71,7 @@
                             <input type="file" id="reg-import-file" accept=".reg" style="display:none" onchange="doImportReg(event)">
                         </div>
                         <div id="reg-path-display" class="reg-path-display">HKCU</div>
-                        <table class="reg-values-table">
+                        <table class="table">
                             <thead><tr><th>名称</th><th>类型</th><th>数据</th><th>操作</th></tr></thead>
                             <tbody id="reg-values-body"></tbody>
                         </table>

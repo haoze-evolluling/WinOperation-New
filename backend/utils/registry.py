@@ -1,5 +1,6 @@
 import win32api
 import win32con
+import winreg
 import re
 
 HKEY_MAP = {
@@ -48,29 +49,29 @@ def list_subkeys(reg_path):
     root, sub_path = _parse_root(reg_path)
     key = None
     try:
-        key = win32api.RegOpenKeyEx(root, sub_path, 0, win32con.KEY_READ)
+        key = winreg.OpenKey(root, sub_path, 0, winreg.KEY_READ)
         subkeys = []
         i = 0
         while True:
             try:
-                name, _, _ = win32api.RegEnumKeyEx(key, i)
+                name = winreg.EnumKey(key, i)
                 subkeys.append(name)
                 i += 1
-            except win32api.error:
+            except OSError:
                 break
         values = []
         i = 0
         while True:
             try:
-                name, data, reg_type = win32api.RegEnumValue(key, i)
+                name, data, reg_type = winreg.EnumValue(key, i)
                 values.append({"name": name, "data": data, "type_int": reg_type})
                 i += 1
-            except win32api.error:
+            except OSError:
                 break
         return {"subkeys": subkeys, "values": values}
     finally:
         if key:
-            win32api.RegCloseKey(key)
+            winreg.CloseKey(key)
 
 
 def tree_subkeys(reg_path, max_depth=2):

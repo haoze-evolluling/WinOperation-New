@@ -8,5 +8,7 @@ if %errorLevel% neq 0 (
 cd /d "%~dp0backend"
 pip install -r requirements.txt -q
 echo Starting WinOperation...
-python app.py
+start "WinOperation Server" python app.py
+timeout /t 2 /nobreak >nul
+start http://localhost:5000
 pause
