@@ -11,20 +11,28 @@ TYPE_MAP = {
 
 
 def read_registry(reg_path, key_name=""):
-    data, reg_type = read_key(reg_path, key_name)
-    return {
-        "path": reg_path,
-        "key": key_name,
-        "value": data,
-        "type": TYPE_MAP.get(reg_type, f"REG_UNKNOWN({reg_type})"),
-    }
+    try:
+        data, reg_type = read_key(reg_path, key_name)
+        return {
+            "status": "ok",
+            "path": reg_path,
+            "key": key_name,
+            "value": data,
+            "type": TYPE_MAP.get(reg_type, f"REG_UNKNOWN({reg_type})"),
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
 
 
 def write_registry(reg_path, key_name, value):
-    write_key(reg_path, key_name, value)
-    return {
-        "path": reg_path,
-        "key": key_name,
-        "value": value,
-        "message": "写入成功",
-    }
+    try:
+        write_key(reg_path, key_name, value)
+        return {
+            "status": "ok",
+            "path": reg_path,
+            "key": key_name,
+            "value": value,
+            "message": "写入成功",
+        }
+    except Exception as e:
+        return {"status": "error", "error": str(e)}
