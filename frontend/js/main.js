@@ -145,8 +145,8 @@ async function loadPerformance() {
     if (data.status !== "ok") { container.textContent = JSON.stringify(data); return; }
     let html = `<table><tr><th>服务名</th><th>显示名称</th><th>状态</th><th>操作</th></tr>`;
     data.data.services.forEach(s => {
-        html += `<tr><td>${s.name}</td><td>${s.display_name}</td><td>${s.status}</td>
-            <td><button class="btn btn-primary" onclick="toggleService('${s.name}', 'start')">启动</button>
+        html += `<tr><td data-label="服务名">${s.name}</td><td data-label="显示名称">${s.display_name}</td><td data-label="状态">${s.status}</td>
+            <td data-label="操作"><button class="btn btn-primary" onclick="toggleService('${s.name}', 'start')">启动</button>
             <button class="btn btn-danger" onclick="toggleService('${s.name}', 'stop')">停止</button></td></tr>`;
     });
     html += "</table>";
