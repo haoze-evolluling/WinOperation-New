@@ -1,3 +1,5 @@
+import ctypes
+
 from utils.wmi import query as wmi_query
 
 
@@ -22,6 +24,10 @@ def get_system_info():
     disk_rows = wmi_query("SELECT DeviceID, Size, FreeSpace FROM Win32_LogicalDisk WHERE DriveType=3")
     disk = []
     for row in disk_rows:
+        if int(row["Size"]) == 0:
+            continue
+        if row.get("FreeSpace") is None:
+            continue
         total_gb_disk = round(int(row["Size"]) / (1024 ** 3), 1)
         free_gb_disk = round(int(row["FreeSpace"]) / (1024 ** 3), 1)
         disk.append({
@@ -31,7 +37,6 @@ def get_system_info():
             "percent": round((1 - int(row["FreeSpace"]) / int(row["Size"])) * 100, 1),
         })
 
-    import ctypes
     uptime_ms = ctypes.windll.kernel32.GetTickCount64()
     uptime_sec = uptime_ms / 1000
     days = int(uptime_sec // 86400)
