@@ -10,6 +10,9 @@ TYPE_MAP = {
 }
 
 
+REVERSE_TYPE_MAP = {v: k for k, v in TYPE_MAP.items()}
+
+
 def read_registry(reg_path, key_name=""):
     try:
         data, reg_type = read_key(reg_path, key_name)
@@ -98,10 +101,12 @@ def batch_write_registry(entries):
     results = []
     for entry in entries:
         try:
+            reg_type = REVERSE_TYPE_MAP.get(entry.get("type", "REG_SZ"), win32con.REG_SZ)
             write_key(
                 entry["path"],
                 entry.get("key", ""),
                 entry.get("value", ""),
+                reg_type,
             )
             results.append({
                 "path": entry["path"],

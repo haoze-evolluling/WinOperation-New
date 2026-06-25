@@ -89,7 +89,7 @@ def tree_subkeys(reg_path, max_depth=2):
                     children.append(child)
         return {
             "path": path,
-            "subkeys": children,
+            "children": children,
             "values_count": len(info["values"]),
         }
 

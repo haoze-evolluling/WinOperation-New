@@ -43,8 +43,8 @@ class TestTreeSubkeys:
         result = tree_subkeys("HKCU\\Software", max_depth=1)
 
         assert result["path"] == "HKCU\\Software"
-        assert len(result["subkeys"]) == 1
-        assert result["subkeys"][0]["subkeys"] == []
+        assert len(result["children"]) == 1
+        assert result["children"][0]["children"] == []
         assert result["values_count"] == 0
 
     @patch("utils.registry.list_subkeys")
@@ -56,7 +56,7 @@ class TestTreeSubkeys:
 
         result = tree_subkeys("HKCU\\Software", max_depth=0)
 
-        assert result["subkeys"] == []
+        assert result["children"] == []
 
     @patch("utils.registry.list_subkeys")
     def test_tree_subkeys_error_returns_error_status(self, mock_list):
