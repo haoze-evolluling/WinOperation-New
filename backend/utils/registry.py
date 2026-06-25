@@ -74,6 +74,7 @@ def list_subkeys(reg_path):
 
 
 def tree_subkeys(reg_path, max_depth=2):
+    max_depth = min(max_depth, 10)
     node_path = reg_path
 
     def _build(path, depth):

@@ -27,9 +27,10 @@ def read_registry(reg_path, key_name=""):
         return {"status": "error", "error": str(e)}
 
 
-def write_registry(reg_path, key_name, value):
+def write_registry(reg_path, key_name, value, reg_type="REG_SZ"):
     try:
-        write_key(reg_path, key_name, value)
+        type_int = REVERSE_TYPE_MAP.get(reg_type, win32con.REG_SZ)
+        write_key(reg_path, key_name, value, type_int)
         return {
             "status": "ok",
             "path": reg_path,

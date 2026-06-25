@@ -95,7 +95,7 @@ def registry_write(reg_path):
     from modules.registry import write_registry
     reg_path = reg_path.replace("/", "\\")
     payload = request.json or {}
-    result = write_registry(reg_path, payload.get("key", ""), payload.get("value", ""))
+    result = write_registry(reg_path, payload.get("key", ""), payload.get("value", ""), payload.get("type", "REG_SZ"))
     return ok(result)
 
 
@@ -112,7 +112,7 @@ def registry_tree(reg_path):
     from modules.registry import tree_registry
     reg_path = reg_path.replace("/", "\\")
     depth = int(request.args.get("depth", 2))
-    result = tree_registry(reg_path, max_depth=depth)
+    result = tree_registry(reg_path, max_depth=min(depth, 10))
     return ok(result)
 
 
@@ -142,8 +142,7 @@ def registry_export():
     result = export_registry(reg_path)
     if result.get("status") == "error":
         return ok(result)
-    from flask import Response
-    return Response(result["content"], mimetype="text/plain")
+    return ok({"content": result["content"]})
 
 
 @app.route("/api/registry/import", methods=["POST"])

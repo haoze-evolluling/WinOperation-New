@@ -44,7 +44,9 @@ def _get_recycle_bin_info():
 
     rb_info = SHQUERYRBINFO()
     rb_info.cbSize = ctypes.sizeof(SHQUERYRBINFO)
-    ctypes.windll.shell32.SHQueryRecycleBinW(None, ctypes.byref(rb_info))
+    ret = ctypes.windll.shell32.SHQueryRecycleBinW(None, ctypes.byref(rb_info))
+    if ret != 0:
+        return 0, 0
     return rb_info.i64Size, rb_info.i64NumItems
 
 
@@ -189,35 +191,37 @@ def scan_cleanup_categories():
     return result
 
 
+def _cleanup_dirs(dirs, category, cleaned, failed, total_freed_bytes):
+    for d in dirs:
+        if not os.path.isdir(d):
+            continue
+        for entry in os.scandir(d):
+            try:
+                if entry.is_file() or entry.is_symlink():
+                    size = entry.stat().st_size
+                    os.remove(entry.path)
+                    total_freed_bytes[0] += size
+                    cleaned.append({"category": category, "path": entry.path, "size_mb": round(size / (1024 * 1024), 1)})
+                elif entry.is_dir():
+                    dir_size = _dir_size(entry.path)
+                    shutil.rmtree(entry.path)
+                    total_freed_bytes[0] += dir_size
+                    cleaned.append({"category": category, "path": entry.path, "size_mb": round(dir_size / (1024 * 1024), 1)})
+            except (PermissionError, OSError) as e:
+                failed.append({"category": category, "path": entry.path, "error": str(e)})
+
+
 def execute_cleanup(category_ids):
     cleaned = []
     failed = []
-    total_freed_bytes = 0
+    total_freed_bytes = [0]
 
     for cat_id in category_ids:
         if cat_id == "temp_files":
-            temp_dirs = [
-                tempfile.gettempdir(),
-                os.path.expandvars(r"%LOCALAPPDATA%\Temp"),
-            ]
-            for temp_dir in temp_dirs:
-                if not os.path.isdir(temp_dir):
-                    continue
-                for entry in os.scandir(temp_dir):
-                    try:
-                        if entry.is_file() or entry.is_symlink():
-                            size = entry.stat().st_size
-                            os.remove(entry.path)
-                            total_freed_bytes += size
-                            cleaned.append({"category": "temp_files", "path": entry.path, "size_mb": round(size / (1024 * 1024), 1)})
-                        elif entry.is_dir():
-                            dir_size = _dir_size(entry.path)
-                            shutil.rmtree(entry.path)
-                            total_freed_bytes += dir_size
-                            cleaned.append({"category": "temp_files", "path": entry.path, "size_mb": round(dir_size / (1024 * 1024), 1)})
-                    except (PermissionError, OSError) as e:
-                        failed.append({"category": "temp_files", "path": entry.path, "error": str(e)})
-                        continue
+            _cleanup_dirs(
+                [tempfile.gettempdir(), os.path.expandvars(r"%LOCALAPPDATA%\Temp")],
+                "temp_files", cleaned, failed, total_freed_bytes,
+            )
 
         elif cat_id == "browser_cache":
             cache_dirs = [
@@ -228,25 +232,7 @@ def execute_cleanup(category_ids):
             if os.path.isdir(firefox_profile):
                 for profile_dir in glob.glob(os.path.join(firefox_profile, "*", "cache2")):
                     cache_dirs.append(profile_dir)
-
-            for cache_dir in cache_dirs:
-                if not os.path.isdir(cache_dir):
-                    continue
-                for entry in os.scandir(cache_dir):
-                    try:
-                        if entry.is_file() or entry.is_symlink():
-                            size = entry.stat().st_size
-                            os.remove(entry.path)
-                            total_freed_bytes += size
-                            cleaned.append({"category": "browser_cache", "path": entry.path, "size_mb": round(size / (1024 * 1024), 1)})
-                        elif entry.is_dir():
-                            dir_size = _dir_size(entry.path)
-                            shutil.rmtree(entry.path)
-                            total_freed_bytes += dir_size
-                            cleaned.append({"category": "browser_cache", "path": entry.path, "size_mb": round(dir_size / (1024 * 1024), 1)})
-                    except (PermissionError, OSError) as e:
-                        failed.append({"category": "browser_cache", "path": entry.path, "error": str(e)})
-                        continue
+            _cleanup_dirs(cache_dirs, "browser_cache", cleaned, failed, total_freed_bytes)
 
         elif cat_id == "thumbnail_cache":
             explorer_dir = os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Windows\Explorer")
@@ -255,41 +241,27 @@ def execute_cleanup(category_ids):
                     try:
                         size = os.path.getsize(thumb_file)
                         os.remove(thumb_file)
-                        total_freed_bytes += size
+                        total_freed_bytes[0] += size
                         cleaned.append({"category": "thumbnail_cache", "path": thumb_file, "size_mb": round(size / (1024 * 1024), 1)})
                     except (PermissionError, OSError) as e:
                         failed.append({"category": "thumbnail_cache", "path": thumb_file, "error": str(e)})
-                        continue
 
         elif cat_id == "windows_update":
-            wu_dir = os.path.expandvars(r"%WINDIR%\SoftwareDistribution\Download")
-            if os.path.isdir(wu_dir):
-                for entry in os.scandir(wu_dir):
-                    try:
-                        if entry.is_file() or entry.is_symlink():
-                            size = entry.stat().st_size
-                            os.remove(entry.path)
-                            total_freed_bytes += size
-                            cleaned.append({"category": "windows_update", "path": entry.path, "size_mb": round(size / (1024 * 1024), 1)})
-                        elif entry.is_dir():
-                            dir_size = _dir_size(entry.path)
-                            shutil.rmtree(entry.path)
-                            total_freed_bytes += dir_size
-                            cleaned.append({"category": "windows_update", "path": entry.path, "size_mb": round(dir_size / (1024 * 1024), 1)})
-                    except (PermissionError, OSError) as e:
-                        failed.append({"category": "windows_update", "path": entry.path, "error": str(e)})
-                        continue
+            _cleanup_dirs(
+                [os.path.expandvars(r"%WINDIR%\SoftwareDistribution\Download")],
+                "windows_update", cleaned, failed, total_freed_bytes,
+            )
 
         elif cat_id == "recycle_bin":
             try:
                 rb_size, rb_count = _get_recycle_bin_info()
                 ctypes.windll.shell32.SHEmptyRecycleBinW(None, None, 0)
-                total_freed_bytes += rb_size
+                total_freed_bytes[0] += rb_size
                 cleaned.append({"category": "recycle_bin", "path": "回收站", "size_mb": round(rb_size / (1024 * 1024), 1)})
             except Exception as e:
                 failed.append({"category": "recycle_bin", "path": "回收站", "error": str(e)})
 
-    total_freed_mb = round(total_freed_bytes / (1024 * 1024), 1)
+    total_freed_mb = round(total_freed_bytes[0] / (1024 * 1024), 1)
 
     return {
         "cleaned": cleaned,

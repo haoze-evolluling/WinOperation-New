@@ -232,6 +232,11 @@ async function writeReg() {
         body: JSON.stringify({ key, value, type }),
     });
     const container = document.getElementById("registry-result");
+    if (result.status !== "ok") {
+        container.innerHTML = `<div class="result-card error"><strong>错误</strong> — ${result.error || '写入失败'}</div>`;
+        hideRegWriteForm();
+        return;
+    }
     container.innerHTML = `<div class="result-card success">写入成功</div>`;
     hideRegWriteForm();
     refreshRegValues();
@@ -243,8 +248,8 @@ async function exportCurrentReg() {
         method: "POST",
         body: JSON.stringify({ path }),
     });
-    if (result.status === "ok" && result.data) {
-        const blob = new Blob([result.data], { type: "application/octet-stream" });
+    if (result.status === "ok" && result.data && result.data.content) {
+        const blob = new Blob([result.data.content], { type: "application/octet-stream" });
         const url = URL.createObjectURL(blob);
         const a = document.createElement("a");
         a.href = url;
@@ -264,10 +269,12 @@ async function doImportReg(event) {
     const file = event.target.files[0];
     if (!file) return;
     const text = await file.text();
-    const result = await api(`/api/registry/import`, {
+    const res = await fetch(`${API}/api/registry/import`, {
         method: "POST",
+        headers: { "Content-Type": "text/plain" },
         body: text,
     });
+    const result = await res.json();
     const container = document.getElementById("registry-result");
     if (result.status === "ok") {
         container.innerHTML = `<div class="result-card success">导入成功</div>`;
