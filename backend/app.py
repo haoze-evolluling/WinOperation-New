@@ -51,6 +51,20 @@ def cleanup_temp_files():
     return ok(result)
 
 
+@app.route("/api/cleanup/scan", methods=["POST"])
+def scan_cleanup():
+    from modules.cleanup import scan_cleanup_categories
+    return ok(scan_cleanup_categories())
+
+
+@app.route("/api/cleanup/execute", methods=["POST"])
+def execute_cleanup():
+    from modules.cleanup import execute_cleanup
+    payload = request.json or {}
+    categories = payload.get("categories", [])
+    return ok(execute_cleanup(categories))
+
+
 # ---- 性能调优 ----
 @app.route("/api/performance/services", methods=["GET"])
 def get_services():
@@ -82,6 +96,41 @@ def registry_write(reg_path):
     reg_path = reg_path.replace("/", "\\")
     payload = request.json or {}
     result = write_registry(reg_path, payload.get("key", ""), payload.get("value", ""))
+    return ok(result)
+
+
+@app.route("/api/registry/list/<path:reg_path>", methods=["GET"])
+def registry_list(reg_path):
+    from modules.registry import list_registry
+    reg_path = reg_path.replace("/", "\\")
+    result = list_registry(reg_path)
+    return ok(result)
+
+
+@app.route("/api/registry/tree/<path:reg_path>", methods=["GET"])
+def registry_tree(reg_path):
+    from modules.registry import tree_registry
+    reg_path = reg_path.replace("/", "\\")
+    depth = int(request.args.get("depth", 2))
+    result = tree_registry(reg_path, max_depth=depth)
+    return ok(result)
+
+
+@app.route("/api/registry/batch-read", methods=["POST"])
+def registry_batch_read():
+    from modules.registry import batch_read_registry
+    payload = request.json or {}
+    entries = payload.get("entries", [])
+    result = batch_read_registry(entries)
+    return ok(result)
+
+
+@app.route("/api/registry/batch-write", methods=["POST"])
+def registry_batch_write():
+    from modules.registry import batch_write_registry
+    payload = request.json or {}
+    entries = payload.get("entries", [])
+    result = batch_write_registry(entries)
     return ok(result)
 
 

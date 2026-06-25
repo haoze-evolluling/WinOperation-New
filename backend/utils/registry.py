@@ -41,3 +41,56 @@ def write_key(reg_path, value_name, data, reg_type=win32con.REG_SZ):
     finally:
         if key:
             win32api.RegCloseKey(key)
+
+
+def list_subkeys(reg_path):
+    root, sub_path = _parse_root(reg_path)
+    key = None
+    try:
+        key = win32api.RegOpenKeyEx(root, sub_path, 0, win32con.KEY_READ)
+        subkeys = []
+        i = 0
+        while True:
+            try:
+                name, _, _ = win32api.RegEnumKeyEx(key, i)
+                subkeys.append(name)
+                i += 1
+            except win32api.error:
+                break
+        values = []
+        i = 0
+        while True:
+            try:
+                name, data, reg_type = win32api.RegEnumValue(key, i)
+                values.append({"name": name, "data": data, "type_int": reg_type})
+                i += 1
+            except win32api.error:
+                break
+        return {"subkeys": subkeys, "values": values}
+    finally:
+        if key:
+            win32api.RegCloseKey(key)
+
+
+def tree_subkeys(reg_path, max_depth=2):
+    node_path = reg_path
+
+    def _build(path, depth):
+        if depth < 0:
+            return None
+        info = list_subkeys(path)
+        children = []
+        if depth > 0:
+            for name in info["subkeys"]:
+                child_path = f"{path}\\{name}"
+                child = _build(child_path, depth - 1)
+                if child is not None:
+                    child["name"] = name
+                    children.append(child)
+        return {
+            "path": path,
+            "subkeys": children,
+            "values_count": len(info["values"]),
+        }
+
+    return _build(node_path, max_depth)
