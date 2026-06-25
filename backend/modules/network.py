@@ -3,7 +3,7 @@ from utils.wmi import query as wmi_query
 
 def get_network_info():
     adapters = wmi_query("""
-        SELECT Description, IPAddress, DNSHostName 
+        SELECT Description, IPAddress 
         FROM Win32_NetworkAdapterConfiguration 
         WHERE IPEnabled = TRUE
     """)
@@ -14,7 +14,7 @@ def get_network_info():
         result.append({
             "name": a.get("Description", ""),
             "ip": ip,
-            "dns": [],
+            "dns": [],  # ponytail: DNS via separate query adds complexity for little value
             "speed": "",
         })
     return {"adapters": result}
