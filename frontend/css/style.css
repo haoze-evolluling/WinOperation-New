@@ -87,6 +87,11 @@ tr:nth-child(even) td {
     background: rgba(48, 48, 48, 0.45);
 }
 
+.cleanup-actions,
+.reg-toolbar {
+    background: rgba(48, 48, 48, 0.35);
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -449,6 +454,11 @@ tr:last-child td { border-bottom: none; }
     gap: 8px;
     margin-bottom: 12px;
     flex-wrap: wrap;
+    padding: 10px 12px;
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border-subtle);
+    border-radius: var(--radius-lg);
 }
 .reg-path-display {
     font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
@@ -520,6 +530,11 @@ tr:last-child td { border-bottom: none; }
     display: flex;
     gap: 12px;
     margin-bottom: 20px;
+    padding: 12px;
+    background: rgba(255, 255, 255, 0.35);
+    backdrop-filter: blur(12px);
+    border: 1px solid var(--glass-border-subtle);
+    border-radius: var(--radius-lg);
 }
 .cleanup-categories {
     display: grid;
