@@ -76,8 +76,11 @@ def get_services():
 def toggle_service(name):
     from modules.performance import toggle_service
     action = (request.json or {}).get("action", "start")
-    result = toggle_service(name, action)
-    return ok(result)
+    try:
+        result = toggle_service(name, action)
+        return ok(result)
+    except Exception as e:
+        return error(str(e))
 
 
 # ---- 注册表 ----

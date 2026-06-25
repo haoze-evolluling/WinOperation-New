@@ -168,7 +168,12 @@ async function toggleService(name, action) {
         method: "POST",
         body: JSON.stringify({ action }),
     });
-    alert(JSON.stringify(result, null, 2));
+    const resultContainer = document.getElementById("performance-result");
+    if (result.status === "ok") {
+        resultContainer.innerHTML = `<div class="result-card success"><strong>${result.data.message}</strong></div>`;
+    } else {
+        resultContainer.innerHTML = `<div class="result-card error"><strong>错误</strong> — ${result.error || '操作失败'}</div>`;
+    }
     loadPerformance();
 }
 
