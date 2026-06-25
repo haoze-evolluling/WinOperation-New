@@ -1,8 +1,10 @@
 import win32com.client
 import pywintypes
+import pythoncom
 
 
 def query(wql):
+    pythoncom.CoInitialize()
     try:
         obj = win32com.client.Dispatch("WbemScripting.SWbemLocator").ConnectServer(".", "root\\cimv2")
     except pywintypes.com_error as e:
@@ -17,4 +19,6 @@ def query(wql):
             results.append(row)
     except pywintypes.com_error as e:
         raise RuntimeError(f"WMI query failed: {e}") from None
+    finally:
+        pythoncom.CoUninitialize()
     return results
