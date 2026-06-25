@@ -321,8 +321,9 @@ h3 {
 .form-group input {
     padding: 8px 12px;
     border-radius: var(--radius-sm);
-    border: 1px solid var(--border-standard);
-    background: var(--bg-input);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(16px);
     color: var(--text-primary);
     font-family: inherit;
     font-size: 0.9em;
@@ -403,8 +404,9 @@ tr:last-child td { border-bottom: none; }
     margin-bottom: 8px;
     padding: 8px 12px;
     border-radius: var(--radius-sm);
-    border: 1px solid var(--border-standard);
-    background: var(--bg-input);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(16px);
     color: var(--text-primary);
     font-family: inherit;
     font-size: 0.9em;
@@ -463,15 +465,19 @@ tr:last-child td { border-bottom: none; }
     align-items: center;
     margin-top: 16px;
     padding: 16px;
-    background: var(--bg-layer2);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
     border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
+    box-shadow: var(--glass-shadow);
 }
 .reg-write-form input,
 .reg-write-form select {
     padding: 8px 12px;
     border-radius: var(--radius-sm);
-    border: 1px solid var(--border-standard);
-    background: var(--bg-input);
+    border: 1px solid var(--glass-border);
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(16px);
     color: var(--text-primary);
     font-family: inherit;
     font-size: 0.9em;
