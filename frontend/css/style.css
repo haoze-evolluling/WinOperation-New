@@ -83,6 +83,10 @@ body::after {
     opacity: 0.40;
 }
 
+tr:nth-child(even) td {
+    background: rgba(48, 48, 48, 0.45);
+}
+
 * { margin: 0; padding: 0; box-sizing: border-box; }
 
 body {
@@ -358,19 +362,20 @@ table {
     margin-top: 16px;
     border-radius: var(--radius-lg);
     overflow: hidden;
-    box-shadow: var(--shadow-card);
-    border: 1px solid var(--border-subtle);
+    box-shadow: var(--glass-shadow);
+    border: 1px solid var(--glass-border);
 }
 
 th, td {
     padding: 12px 16px;
     text-align: left;
-    border-bottom: 1px solid var(--border-subtle);
+    border-bottom: 1px solid var(--glass-border);
     font-size: 0.9em;
 }
 
 th {
-    background: var(--bg-layer2);
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(var(--glass-blur));
     color: var(--accent);
     font-weight: 600;
     text-transform: uppercase;
@@ -378,8 +383,8 @@ th {
     letter-spacing: 0.04em;
 }
 
-td { background: var(--bg-layer1); color: var(--text-secondary); }
-
+td { background: var(--glass-bg); color: var(--text-secondary); }
+tr:nth-child(even) td { background: rgba(255, 255, 255, 0.45); }
 tr:last-child td { border-bottom: none; }
 
 .reg-layout {
