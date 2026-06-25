@@ -334,14 +334,15 @@ h3 {
 .result {
     margin-top: 16px;
     padding: 16px 20px;
-    background: var(--bg-layer2);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
     border-radius: var(--radius-lg);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--glass-border);
     white-space: pre-wrap;
     font-family: "Cascadia Code", "Fira Code", "Consolas", monospace;
     font-size: 0.85em;
     color: var(--text-secondary);
-    box-shadow: var(--shadow-card);
+    box-shadow: var(--glass-shadow);
 }
 
 p {
@@ -551,10 +552,12 @@ tr:last-child td { border-bottom: none; }
 }
 .result-card {
     padding: 16px 20px;
-    background: var(--bg-layer2);
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
     border-radius: var(--radius-lg);
-    border: 1px solid var(--border-subtle);
+    border: 1px solid var(--glass-border);
     margin-bottom: 12px;
+    box-shadow: var(--glass-shadow);
 }
 .result-card.success {
     border-left: 4px solid var(--success);
