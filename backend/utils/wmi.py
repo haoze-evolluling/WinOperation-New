@@ -4,9 +4,9 @@ import pywintypes
 
 def query(wql):
     try:
-        obj = win32com.client.GetObject(r"winmgmts:\\.\root\cimv2")
+        obj = win32com.client.Dispatch("WbemScripting.SWbemLocator").ConnectServer(".", "root\\cimv2")
     except pywintypes.com_error as e:
-        raise RuntimeError(str(e)) from None
+        raise RuntimeError(f"WMI connect failed: {e}") from None
     cols = None
     results = []
     try:
@@ -16,5 +16,5 @@ def query(wql):
             row = {c: getattr(item, c, None) for c in cols}
             results.append(row)
     except pywintypes.com_error as e:
-        raise RuntimeError(str(e)) from None
+        raise RuntimeError(f"WMI query failed: {e}") from None
     return results
