@@ -125,13 +125,13 @@ body::after {
 
 .sidebar {
     width: 240px;
-    background: var(--bg-sidebar);
-    backdrop-filter: blur(20px) saturate(125%);
-    -webkit-backdrop-filter: blur(20px) saturate(125%);
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(30px) saturate(140%);
+    -webkit-backdrop-filter: blur(30px) saturate(140%);
     padding: 24px 16px;
     display: flex;
     flex-direction: column;
-    border-right: 1px solid var(--border-subtle);
+    border-right: 1px solid var(--glass-border);
     box-shadow: var(--shadow-sidebar);
     position: sticky;
     top: 0;
