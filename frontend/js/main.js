@@ -195,7 +195,7 @@ async function loadRegValues(path) {
     document.getElementById("reg-path-display").textContent = path;
     const data = await api(`/api/registry/list/${encodeURIComponent(path)}`);
     const tbody = document.getElementById("reg-values-body");
-    if (data.status !== "ok") { tbody.innerHTML = `<tr><td colspan="3">加载失败</td></tr>`; return; }
+    if (data.status !== "ok") { tbody.innerHTML = `<tr><td colspan="4">加载失败</td></tr>`; return; }
     tbody.innerHTML = "";
     data.data.forEach(item => {
         const tr = document.createElement("tr");
@@ -203,6 +203,7 @@ async function loadRegValues(path) {
             <td>${item.name}</td>
             <td><span class="reg-type-badge">${item.type}</span></td>
             <td>${item.data}</td>
+            <td></td>
         `;
         tbody.appendChild(tr);
     });
