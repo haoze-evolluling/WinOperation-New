@@ -1,5 +1,16 @@
 from flask import Flask, jsonify, request, send_from_directory
+import ctypes
 import os
+import sys
+
+
+def require_admin():
+    if not ctypes.windll.shell32.IsUserAnAdmin():
+        print("错误: 此应用需要管理员权限运行，请右键以管理员身份启动。", file=sys.stderr)
+        sys.exit(1)
+
+
+require_admin()
 
 app = Flask(__name__)
 
