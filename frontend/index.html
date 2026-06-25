@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Windows 系统优化工具</title>
+    <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+    <div class="container">
+        <nav class="sidebar">
+            <div class="logo">WinOptimizer</div>
+            <ul class="nav-menu">
+                <li class="nav-item active" data-panel="dashboard">概览</li>
+                <li class="nav-item" data-panel="system-info">系统信息</li>
+                <li class="nav-item" data-panel="cleanup">系统清理</li>
+                <li class="nav-item" data-panel="performance">性能调优</li>
+                <li class="nav-item" data-panel="registry">注册表</li>
+                <li class="nav-item" data-panel="network">网络优化</li>
+            </ul>
+        </nav>
+        <main class="content">
+            <!-- 概览 -->
+            <section id="panel-dashboard" class="panel active">
+                <h2>系统概览</h2>
+                <div class="cards" id="dashboard-cards"></div>
+            </section>
+
+            <!-- 系统信息 -->
+            <section id="panel-system-info" class="panel">
+                <h2>系统信息</h2>
+                <div id="system-info-content"></div>
+            </section>
+
+            <!-- 系统清理 -->
+            <section id="panel-cleanup" class="panel">
+                <h2>系统清理</h2>
+                <button class="btn btn-primary" onclick="doCleanup()">清理临时文件</button>
+                <div id="cleanup-result"></div>
+            </section>
+
+            <!-- 性能调优 -->
+            <section id="panel-performance" class="panel">
+                <h2>服务管理</h2>
+                <div id="performance-content"></div>
+            </section>
+
+            <!-- 注册表 -->
+            <section id="panel-registry" class="panel">
+                <h2>注册表操作</h2>
+                <div class="form-group">
+                    <input type="text" id="reg-path" placeholder="注册表路径 (如 SOFTWARE\Microsoft)">
+                    <input type="text" id="reg-key" placeholder="键名 (可选)">
+                    <button class="btn btn-primary" onclick="readReg()">读取</button>
+                </div>
+                <div class="form-group">
+                    <input type="text" id="reg-write-path" placeholder="注册表路径">
+                    <input type="text" id="reg-write-key" placeholder="键名">
+                    <input type="text" id="reg-write-value" placeholder="值">
+                    <button class="btn btn-danger" onclick="writeReg()">写入</button>
+                </div>
+                <div id="registry-result"></div>
+            </section>
+
+            <!-- 网络优化 -->
+            <section id="panel-network" class="panel">
+                <h2>网络信息</h2>
+                <div id="network-content"></div>
+            </section>
+        </main>
+    </div>
+    <script src="/js/main.js"></script>
+</body>
+</html>
