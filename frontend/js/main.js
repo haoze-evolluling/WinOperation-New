@@ -40,6 +40,9 @@ async function loadPanel(panel) {
         case "network":
             await loadNetwork();
             break;
+        case "registry":
+            loadRegTree();
+            break;
     }
 }
 
@@ -78,10 +81,62 @@ async function loadSystemInfo() {
     container.innerHTML = html;
 }
 
-async function doCleanup() {
-    const result = await api("/api/cleanup/temp-files", { method: "POST", body: JSON.stringify({}) });
+async function doScanCleanup() {
+    const result = await api("/api/cleanup/scan", { method: "POST", body: JSON.stringify({}) });
     const container = document.getElementById("cleanup-result");
-    container.innerHTML = `<div class="result">${JSON.stringify(result, null, 2)}</div>`;
+    if (result.status !== "ok") { container.innerHTML = `<div class="result-card error"><strong>错误</strong> — ${result.error || '操作失败'}</div>`; return; }
+    renderCleanupCategories(result.data.categories);
+}
+
+function renderCleanupCategories(categories) {
+    const container = document.getElementById("cleanup-categories");
+    container.innerHTML = "";
+    categories.forEach(cat => {
+        const card = document.createElement("div");
+        card.className = "cleanup-category";
+        card.innerHTML = `
+            <div class="cleanup-category-header">
+                <input type="checkbox" id="cat-${cat.id}" value="${cat.id}" onchange="updateCleanupBtn()">
+                <label for="cat-${cat.id}" class="cleanup-category-name">${cat.name}</label>
+            </div>
+            <div class="cleanup-category-desc">${cat.description}</div>
+            <div class="cleanup-category-meta">${cat.file_count} 个文件 · ${cat.size_mb} MB</div>
+        `;
+        container.appendChild(card);
+    });
+}
+
+function updateCleanupBtn() {
+    const checked = document.querySelectorAll("#cleanup-categories input[type='checkbox']:checked");
+    document.getElementById("cleanup-execute-btn").disabled = checked.length === 0;
+}
+
+async function doCleanupSelected() {
+    const checked = document.querySelectorAll("#cleanup-categories input[type='checkbox']:checked");
+    const ids = Array.from(checked).map(cb => cb.value);
+    if (ids.length === 0) return;
+    const result = await api("/api/cleanup/execute", { method: "POST", body: JSON.stringify({ categories: ids }) });
+    const container = document.getElementById("cleanup-result");
+    if (result.status !== "ok") { container.innerHTML = `<div class="result-card error"><strong>错误</strong> — ${result.error || '操作失败'}</div>`; return; }
+    renderCleanupResult(result.data);
+}
+
+function renderCleanupResult(data) {
+    const container = document.getElementById("cleanup-result");
+    let html = `<div class="result-card success"><strong>清理完成</strong> — 共释放 ${data.total_freed_mb} MB</div>`;
+    if (data.cleaned && data.cleaned.length > 0) {
+        html += `<div class="result-card"><strong>已清理项目 (${data.cleaned.length})</strong>
+            <ul class="result-list">
+                ${data.cleaned.map(c => `<li class="result-list-item">${c.path} (${c.size_mb} MB)</li>`).join("")}
+            </ul></div>`;
+    }
+    if (data.failed && data.failed.length > 0) {
+        html += `<div class="result-card error"><strong>失败项目 (${data.failed.length})</strong>
+            <ul class="result-list">
+                ${data.failed.map(f => `<li class="result-list-item">${f.path}: ${f.error}</li>`).join("")}
+            </ul></div>`;
+    }
+    container.innerHTML = html;
 }
 
 async function loadPerformance() {
@@ -107,23 +162,118 @@ async function toggleService(name, action) {
     loadPerformance();
 }
 
-async function readReg() {
-    const path = document.getElementById("reg-path").value;
-    const key = document.getElementById("reg-key").value;
-    const data = await api(`/api/registry/read/${encodeURIComponent(path)}?key=${encodeURIComponent(key)}`);
-    document.getElementById("registry-result").innerHTML = `<div class="result">${JSON.stringify(data, null, 2)}</div>`;
+async function loadRegTree() {
+    const basePath = document.getElementById("reg-tree-path").value || "HKCU";
+    const data = await api(`/api/registry/tree/${encodeURIComponent(basePath)}?depth=2`);
+    const container = document.getElementById("reg-tree");
+    if (data.status !== "ok") { container.innerHTML = `<div class="result-card error"><strong>错误</strong> — 加载失败</div>`; return; }
+    container.innerHTML = "";
+    renderRegTree(data.data, 0, basePath, container);
+}
+
+function renderRegTree(tree, depth, parentPath, container) {
+    tree.forEach(node => {
+        const div = document.createElement("div");
+        div.className = "reg-tree-node";
+        div.style.paddingLeft = `${depth * 16 + 8}px`;
+        div.textContent = node.name;
+        div.title = node.path || parentPath + "\\" + node.name;
+        div.addEventListener("click", () => {
+            container.querySelectorAll(".reg-tree-node").forEach(n => n.classList.remove("active"));
+            div.classList.add("active");
+            loadRegValues(node.path || parentPath + "\\" + node.name);
+        });
+        container.appendChild(div);
+        if (node.children && node.children.length > 0) {
+            renderRegTree(node.children, depth + 1, node.path || parentPath + "\\" + node.name, container);
+        }
+    });
+}
+
+async function loadRegValues(path) {
+    window._currentRegPath = path;
+    document.getElementById("reg-path-display").textContent = path;
+    const data = await api(`/api/registry/list/${encodeURIComponent(path)}`);
+    const tbody = document.getElementById("reg-values-body");
+    if (data.status !== "ok") { tbody.innerHTML = `<tr><td colspan="3">加载失败</td></tr>`; return; }
+    tbody.innerHTML = "";
+    data.data.forEach(item => {
+        const tr = document.createElement("tr");
+        tr.innerHTML = `
+            <td>${item.name}</td>
+            <td><span class="reg-type-badge">${item.type}</span></td>
+            <td>${item.data}</td>
+        `;
+        tbody.appendChild(tr);
+    });
+}
+
+async function refreshRegValues() {
+    if (window._currentRegPath) await loadRegValues(window._currentRegPath);
+}
+
+function showRegWriteForm() {
+    document.getElementById("reg-write-form").style.display = "flex";
+}
+
+function hideRegWriteForm() {
+    document.getElementById("reg-write-form").style.display = "none";
 }
 
 async function writeReg() {
-    const path = document.getElementById("reg-write-path").value;
+    const path = document.getElementById("reg-tree-path").value || "HKCU";
     const key = document.getElementById("reg-write-key").value;
+    const type = document.getElementById("reg-write-type").value;
     const value = document.getElementById("reg-write-value").value;
-    if (!confirm("确定要写入注册表吗？")) return;
-    const data = await api(`/api/registry/write/${encodeURIComponent(path)}`, {
+    if (!key) { alert("请输入键名"); return; }
+    const result = await api(`/api/registry/write/${encodeURIComponent(path)}`, {
         method: "POST",
-        body: JSON.stringify({ key, value }),
+        body: JSON.stringify({ key, value, type }),
     });
-    document.getElementById("registry-result").innerHTML = `<div class="result">${JSON.stringify(data, null, 2)}</div>`;
+    const container = document.getElementById("registry-result");
+    container.innerHTML = `<div class="result-card success">写入成功</div>`;
+    hideRegWriteForm();
+    refreshRegValues();
+}
+
+async function exportCurrentReg() {
+    const path = window._currentRegPath || document.getElementById("reg-tree-path").value || "HKCU";
+    const result = await api(`/api/registry/export`, {
+        method: "POST",
+        body: JSON.stringify({ path }),
+    });
+    if (result.status === "ok" && result.data) {
+        const blob = new Blob([result.data], { type: "application/octet-stream" });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = "export.reg";
+        a.click();
+        URL.revokeObjectURL(url);
+    } else {
+        alert("导出失败");
+    }
+}
+
+function importRegFile() {
+    document.getElementById("reg-import-file").click();
+}
+
+async function doImportReg(event) {
+    const file = event.target.files[0];
+    if (!file) return;
+    const text = await file.text();
+    const result = await api(`/api/registry/import`, {
+        method: "POST",
+        body: text,
+    });
+    const container = document.getElementById("registry-result");
+    if (result.status === "ok") {
+        container.innerHTML = `<div class="result-card success">导入成功</div>`;
+    } else {
+        container.innerHTML = `<div class="result-card error">导入失败</div>`;
+    }
+    event.target.value = "";
 }
 
 async function loadNetwork() {

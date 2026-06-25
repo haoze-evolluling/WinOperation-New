@@ -39,8 +39,12 @@
             <!-- 系统清理 -->
             <section id="panel-cleanup" class="panel">
                 <h2>系统清理</h2>
-                <button class="btn btn-primary" onclick="doCleanup()">清理临时文件</button>
-                <div id="cleanup-result"></div>
+                <div class="cleanup-actions">
+                    <button class="btn btn-primary" onclick="doScanCleanup()">扫描可清理项</button>
+                    <button class="btn btn-danger" onclick="doCleanupSelected()" id="cleanup-execute-btn" disabled>清理选中项</button>
+                </div>
+                <div id="cleanup-categories" class="cleanup-categories"></div>
+                <div id="cleanup-result" class="result-area"></div>
             </section>
 
             <!-- 性能调优 -->
@@ -52,18 +56,39 @@
             <!-- 注册表 -->
             <section id="panel-registry" class="panel">
                 <h2>注册表操作</h2>
-                <div class="form-group">
-                    <input type="text" id="reg-path" placeholder="注册表路径 (如 SOFTWARE\Microsoft)">
-                    <input type="text" id="reg-key" placeholder="键名 (可选)">
-                    <button class="btn btn-primary" onclick="readReg()">读取</button>
+                <div class="reg-layout">
+                    <div class="reg-sidebar">
+                        <input type="text" id="reg-tree-path" placeholder="路径 (如 HKCU\Software)" value="HKCU">
+                        <button class="btn btn-sm" onclick="loadRegTree()">加载</button>
+                        <div id="reg-tree" class="reg-tree"></div>
+                    </div>
+                    <div class="reg-main">
+                        <div class="reg-toolbar">
+                            <button class="btn btn-primary" onclick="refreshRegValues()">刷新</button>
+                            <button class="btn btn-success" onclick="showRegWriteForm()">新建/修改值</button>
+                            <button class="btn btn-secondary" onclick="exportCurrentReg()">导出 .reg</button>
+                            <button class="btn btn-secondary" onclick="importRegFile()">导入 .reg</button>
+                            <input type="file" id="reg-import-file" accept=".reg" style="display:none" onchange="doImportReg(event)">
+                        </div>
+                        <div id="reg-path-display" class="reg-path-display">HKCU</div>
+                        <table class="reg-values-table">
+                            <thead><tr><th>名称</th><th>类型</th><th>数据</th></tr></thead>
+                            <tbody id="reg-values-body"></tbody>
+                        </table>
+                        <div id="reg-write-form" class="reg-write-form" style="display:none">
+                            <input type="text" id="reg-write-key" placeholder="键名">
+                            <select id="reg-write-type">
+                                <option value="REG_SZ">REG_SZ</option>
+                                <option value="REG_DWORD">REG_DWORD</option>
+                                <option value="REG_BINARY">REG_BINARY</option>
+                            </select>
+                            <input type="text" id="reg-write-value" placeholder="值">
+                            <button class="btn btn-primary" onclick="writeReg()">写入</button>
+                            <button class="btn btn-sm" onclick="hideRegWriteForm()">取消</button>
+                        </div>
+                    </div>
                 </div>
-                <div class="form-group">
-                    <input type="text" id="reg-write-path" placeholder="注册表路径">
-                    <input type="text" id="reg-write-key" placeholder="键名">
-                    <input type="text" id="reg-write-value" placeholder="值">
-                    <button class="btn btn-danger" onclick="writeReg()">写入</button>
-                </div>
-                <div id="registry-result"></div>
+                <div id="registry-result" class="result-area"></div>
             </section>
 
             <!-- 网络优化 -->
