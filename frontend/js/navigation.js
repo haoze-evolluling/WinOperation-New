@@ -1,10 +1,25 @@
+function activatePanel(panelName) {
+    document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
+    document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
+    document.querySelector(`.nav-item[data-panel="${panelName}"]`)?.classList.add("active");
+    const panel = document.getElementById("panel-" + panelName);
+    if (panel) panel.classList.add("active");
+    loadPanel(panelName);
+}
+
+function restoreNavigation() {
+    const saved = localStorage.getItem("activePanel");
+    if (saved && document.querySelector(`.nav-item[data-panel="${saved}"]`)) {
+        activatePanel(saved);
+        return true;
+    }
+    return false;
+}
+
 document.querySelectorAll(".nav-item").forEach(item => {
     item.addEventListener("click", () => {
-        document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
-        document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
-        item.classList.add("active");
-        document.getElementById("panel-" + item.dataset.panel).classList.add("active");
-        loadPanel(item.dataset.panel);
+        activatePanel(item.dataset.panel);
+        localStorage.setItem("activePanel", item.dataset.panel);
     });
 });
 
