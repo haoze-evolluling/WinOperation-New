@@ -110,7 +110,7 @@ def registry_list(reg_path):
     try:
         raw = list_subkeys(reg_path)
         values = [{"name": v["name"], "data": v["data"], "type": TYPE_MAP.get(v["type_int"], f"REG_UNKNOWN({v['type_int']})")} for v in raw["values"]]
-        return ok({"subkeys": raw["subkeys"], "values": values})
+        return ok({"status": "ok", "subkeys": raw["subkeys"], "values": values})
     except Exception as e:
         return error(str(e))
 
@@ -122,7 +122,7 @@ def registry_tree(reg_path):
     depth = int(request.args.get("depth", 2))
     try:
         tree = tree_subkeys(reg_path, max_depth=min(depth, 10))
-        return ok(tree)
+        return ok({"status": "ok", "path": reg_path, "tree": tree})
     except Exception as e:
         return error(str(e))
 
