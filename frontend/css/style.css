@@ -88,7 +88,7 @@
 
     .cleanup-actions,
     .reg-toolbar {
-        background: var(--glass-bg);
+    background: var(--glass-bg-strong);
     }
 }
 
@@ -247,7 +247,7 @@ h3 {
 .cards {
     display: grid;
     grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-    gap: 16px;
+    gap: 10px;
 }
 
 .card {
@@ -380,7 +380,7 @@ table {
     width: 100%;
     border-collapse: separate;
     border-spacing: 0;
-    margin-top: 16px;
+    margin-top: 10px;
     border-radius: var(--radius-lg);
     overflow: hidden;
     box-shadow: var(--glass-shadow);
@@ -410,14 +410,17 @@ tr:last-child td { border-bottom: none; }
 
 .reg-layout {
     display: flex;
-    gap: 16px;
+    gap: 10px;
     min-height: 400px;
 }
 .reg-sidebar {
     width: 260px;
     flex-shrink: 0;
-    border-right: 1px solid var(--border-subtle);
-    padding-right: 16px;
+    padding-right: 12px;
+    background: var(--glass-bg);
+    backdrop-filter: blur(var(--glass-blur));
+    border-radius: var(--radius-lg);
+    border: 1px solid var(--glass-border);
 }
 .reg-sidebar input {
     width: 100%;
@@ -474,9 +477,9 @@ tr:last-child td { border-bottom: none; }
     margin-bottom: 12px;
     flex-wrap: wrap;
     padding: 10px 12px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border-subtle);
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
 }
 .reg-path-display {
@@ -496,7 +499,7 @@ tr:last-child td { border-bottom: none; }
     align-items: center;
     margin-top: 16px;
     padding: 16px;
-    background: var(--glass-bg);
+    background: var(--glass-bg-strong);
     backdrop-filter: blur(var(--glass-blur));
     border-radius: var(--radius-lg);
     border: 1px solid var(--glass-border);
@@ -552,15 +555,15 @@ tr:last-child td { border-bottom: none; }
     gap: 12px;
     margin-bottom: 20px;
     padding: 12px;
-    background: var(--glass-bg);
-    backdrop-filter: blur(12px);
-    border: 1px solid var(--glass-border-subtle);
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(var(--glass-blur));
+    border: 1px solid var(--glass-border);
     border-radius: var(--radius-lg);
 }
 .cleanup-categories {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 12px;
+    gap: 8px;
 }
 .cleanup-category {
     background: var(--glass-bg);
@@ -628,7 +631,7 @@ tr:last-child td { border-bottom: none; }
 .service-cards {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-    gap: 12px;
+    gap: 8px;
     margin-top: 16px;
 }
 .service-card {
