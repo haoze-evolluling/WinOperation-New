@@ -66,7 +66,6 @@
     --glass-bg-strong: rgba(48, 48, 48, 0.90);
     --glass-border: rgba(255, 255, 255, 0.10);
     --glass-border-subtle: rgba(255, 255, 255, 0.05);
-    --glass-blur: 22px;
     --glass-shadow: 0 4px 24px rgba(0, 0, 0, 0.25), 0 0 1px rgba(0, 0, 0, 0.30);
     --glass-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 1px rgba(0, 0, 0, 0.40);
 

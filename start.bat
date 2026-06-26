@@ -6,7 +6,6 @@ if %errorLevel% neq 0 (
     exit /b
 )
 cd /d "%~dp0backend"
-pip install -r requirements.txt -q
 echo Starting WinOperation...
 start "WinOperation Server" python app.py
 timeout /t 2 /nobreak >nul

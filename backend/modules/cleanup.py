@@ -50,87 +50,69 @@ def _get_recycle_bin_info():
     return rb_info.i64Size, rb_info.i64NumItems
 
 
+# ponytail: single source of truth for category paths; scan and execute both reference this
+CATEGORIES = [
+    {
+        "id": "temp_files",
+        "name": "临时文件",
+        "description": "系统临时文件和缓存",
+        "paths": [
+            tempfile.gettempdir(),
+            os.path.expandvars(r"%LOCALAPPDATA%\Temp"),
+        ],
+    },
+    {
+        "id": "browser_cache",
+        "name": "浏览器缓存",
+        "description": "Chrome、Edge、Firefox 缓存",
+        "paths": [
+            os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache"),
+            os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Cache"),
+        ],
+    },
+    {
+        "id": "thumbnail_cache",
+        "name": "缩略图缓存",
+        "description": "Windows 资源管理器缩略图缓存",
+        "paths": [
+            os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Windows\Explorer"),
+        ],
+    },
+    {
+        "id": "windows_update",
+        "name": "Windows 更新缓存",
+        "description": "Windows 更新下载文件",
+        "paths": [
+            os.path.expandvars(r"%WINDIR%\SoftwareDistribution\Download"),
+        ],
+    },
+    {
+        "id": "recycle_bin",
+        "name": "回收站",
+        "description": "回收站中的文件",
+        "paths": [],
+    },
+]
+
+_CATEGORY_BY_ID = {c["id"]: c for c in CATEGORIES}
+
+
 def do_cleanup_temp(payload):
-    temp_dirs = [
-        tempfile.gettempdir(),
-        os.path.expandvars(r"%LOCALAPPDATA%\Temp"),
-    ]
-    cleaned_paths = []
-    freed_bytes = 0
-
-    for temp_dir in temp_dirs:
-        if not os.path.isdir(temp_dir):
-            continue
-        for entry in os.scandir(temp_dir):
-            try:
-                path = entry.path
-                if entry.is_file() or entry.is_symlink():
-                    size = entry.stat().st_size
-                    os.remove(path)
-                    freed_bytes += size
-                    cleaned_paths.append(path)
-                elif entry.is_dir():
-                    dir_size = _dir_size(path)
-                    shutil.rmtree(path)
-                    freed_bytes += dir_size
-                    cleaned_paths.append(path)
-            except (PermissionError, OSError):
-                continue
-
-    freed_mb = round(freed_bytes / (1024 * 1024), 1)
+    cleaned = []
+    failed = []
+    freed = [0]
+    _cleanup_dirs(CATEGORIES[0]["paths"], "temp_files", cleaned, failed, freed)
+    freed_mb = round(freed[0] / (1024 * 1024), 1)
     return {
-        "cleaned_paths": cleaned_paths,
+        "cleaned_paths": [c["path"] for c in cleaned],
         "freed_mb": freed_mb,
         "message": f"清理完成，释放 {freed_mb} MB",
     }
 
 
 def scan_cleanup_categories():
-    categories = [
-        {
-            "id": "temp_files",
-            "name": "临时文件",
-            "description": "系统临时文件和缓存",
-            "paths": [
-                tempfile.gettempdir(),
-                os.path.expandvars(r"%LOCALAPPDATA%\Temp"),
-            ],
-        },
-        {
-            "id": "browser_cache",
-            "name": "浏览器缓存",
-            "description": "Chrome、Edge、Firefox 缓存",
-            "paths": [
-                os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache"),
-                os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Cache"),
-            ],
-        },
-        {
-            "id": "thumbnail_cache",
-            "name": "缩略图缓存",
-            "description": "Windows 资源管理器缩略图缓存",
-            "paths": [
-                os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Windows\Explorer"),
-            ],
-        },
-        {
-            "id": "windows_update",
-            "name": "Windows 更新缓存",
-            "description": "Windows 更新下载文件",
-            "paths": [
-                os.path.expandvars(r"%WINDIR%\SoftwareDistribution\Download"),
-            ],
-        },
-        {
-            "id": "recycle_bin",
-            "name": "回收站",
-            "description": "回收站中的文件",
-            "paths": [],
-        },
-    ]
-
     result = []
-    for cat in categories:
+    for cat in CATEGORIES:
         file_count = 0
         size_bytes = 0
         scan_paths = list(cat["paths"])
@@ -217,49 +199,41 @@ def execute_cleanup(category_ids):
     total_freed_bytes = [0]
 
     for cat_id in category_ids:
-        if cat_id == "temp_files":
-            _cleanup_dirs(
-                [tempfile.gettempdir(), os.path.expandvars(r"%LOCALAPPDATA%\Temp")],
-                "temp_files", cleaned, failed, total_freed_bytes,
-            )
+        cat = _CATEGORY_BY_ID.get(cat_id)
+        if cat is None:
+            continue
 
-        elif cat_id == "browser_cache":
-            cache_dirs = [
-                os.path.expandvars(r"%LOCALAPPDATA%\Google\Chrome\User Data\Default\Cache"),
-                os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Edge\User Data\Default\Cache"),
-            ]
+        if cat_id == "browser_cache":
+            cache_dirs = list(cat["paths"])
             firefox_profile = os.path.expandvars(r"%LOCALAPPDATA%\Mozilla\Firefox\Profiles")
             if os.path.isdir(firefox_profile):
                 for profile_dir in glob.glob(os.path.join(firefox_profile, "*", "cache2")):
                     cache_dirs.append(profile_dir)
-            _cleanup_dirs(cache_dirs, "browser_cache", cleaned, failed, total_freed_bytes)
+            _cleanup_dirs(cache_dirs, cat_id, cleaned, failed, total_freed_bytes)
 
         elif cat_id == "thumbnail_cache":
-            explorer_dir = os.path.expandvars(r"%LOCALAPPDATA%\Microsoft\Windows\Explorer")
+            explorer_dir = cat["paths"][0]
             if os.path.isdir(explorer_dir):
                 for thumb_file in glob.glob(os.path.join(explorer_dir, "thumbcache_*")):
                     try:
                         size = os.path.getsize(thumb_file)
                         os.remove(thumb_file)
                         total_freed_bytes[0] += size
-                        cleaned.append({"category": "thumbnail_cache", "path": thumb_file, "size_mb": round(size / (1024 * 1024), 1)})
+                        cleaned.append({"category": cat_id, "path": thumb_file, "size_mb": round(size / (1024 * 1024), 1)})
                     except (PermissionError, OSError) as e:
-                        failed.append({"category": "thumbnail_cache", "path": thumb_file, "error": str(e)})
-
-        elif cat_id == "windows_update":
-            _cleanup_dirs(
-                [os.path.expandvars(r"%WINDIR%\SoftwareDistribution\Download")],
-                "windows_update", cleaned, failed, total_freed_bytes,
-            )
+                        failed.append({"category": cat_id, "path": thumb_file, "error": str(e)})
 
         elif cat_id == "recycle_bin":
             try:
                 rb_size, rb_count = _get_recycle_bin_info()
                 ctypes.windll.shell32.SHEmptyRecycleBinW(None, None, 0)
                 total_freed_bytes[0] += rb_size
-                cleaned.append({"category": "recycle_bin", "path": "回收站", "size_mb": round(rb_size / (1024 * 1024), 1)})
+                cleaned.append({"category": cat_id, "path": "回收站", "size_mb": round(rb_size / (1024 * 1024), 1)})
             except Exception as e:
-                failed.append({"category": "recycle_bin", "path": "回收站", "error": str(e)})
+                failed.append({"category": cat_id, "path": "回收站", "error": str(e)})
+
+        else:
+            _cleanup_dirs(cat["paths"], cat_id, cleaned, failed, total_freed_bytes)
 
     total_freed_mb = round(total_freed_bytes[0] / (1024 * 1024), 1)
 

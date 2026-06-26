@@ -1,4 +1,0 @@
-- Status: DONE
-- Commits: fcb1753
-- Test: `python -c "from modules.cleanup import do_cleanup_temp; import json; print(json.dumps(do_cleanup_temp({}), indent=2, ensure_ascii=False))"` — cleaned 104 paths, freed 717.9 MB
-- Concerns: None

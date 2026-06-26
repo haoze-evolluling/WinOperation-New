@@ -3,23 +3,32 @@ import win32con
 import winreg
 import re
 
-HKEY_MAP = {
-    "HKLM": win32con.HKEY_LOCAL_MACHINE,
-    "HKCU": win32con.HKEY_CURRENT_USER,
-    "HKCR": win32con.HKEY_CLASSES_ROOT,
-    "HKU": win32con.HKEY_USERS,
-    "HKCC": win32con.HKEY_CURRENT_CONFIG,
+_ABBREV_TO_FULL = {
+    "HKLM": "HKEY_LOCAL_MACHINE",
+    "HKCU": "HKEY_CURRENT_USER",
+    "HKCR": "HKEY_CLASSES_ROOT",
+    "HKU": "HKEY_USERS",
+    "HKCC": "HKEY_CURRENT_CONFIG",
 }
+_ROOT_TO_ABBREV = {v: k for k, v in _ABBREV_TO_FULL.items()}
 
 
 def _parse_root(reg_path):
     parts = reg_path.split("\\", 1)
     root_str = parts[0].upper()
     sub_path = parts[1] if len(parts) > 1 else ""
-    root = HKEY_MAP.get(root_str)
+    root = _ABBREV_TO_FULL.get(root_str)
     if root is None:
         raise ValueError(f"不支持的注册表根: {root_str}")
-    return root, sub_path
+    # map full name back to win32 constant
+    root_map = {
+        "HKEY_LOCAL_MACHINE": win32con.HKEY_LOCAL_MACHINE,
+        "HKEY_CURRENT_USER": win32con.HKEY_CURRENT_USER,
+        "HKEY_CLASSES_ROOT": win32con.HKEY_CLASSES_ROOT,
+        "HKEY_USERS": win32con.HKEY_USERS,
+        "HKEY_CURRENT_CONFIG": win32con.HKEY_CURRENT_CONFIG,
+    }
+    return root_map[root], sub_path
 
 
 def read_key(reg_path, value_name=""):
@@ -120,14 +129,7 @@ def _reg_path_to_string(reg_path):
     parts = reg_path.split("\\", 1)
     root_str = parts[0].upper()
     rest = parts[1] if len(parts) > 1 else ""
-    abbrev_to_full = {
-        "HKLM": "HKEY_LOCAL_MACHINE",
-        "HKCU": "HKEY_CURRENT_USER",
-        "HKCR": "HKEY_CLASSES_ROOT",
-        "HKU": "HKEY_USERS",
-        "HKCC": "HKEY_CURRENT_CONFIG",
-    }
-    root_name = abbrev_to_full.get(root_str, root_str)
+    root_name = _ABBREV_TO_FULL.get(root_str, root_str)
     if rest:
         return f"{root_name}\\{rest}"
     return root_name
@@ -139,14 +141,6 @@ def import_reg(reg_text):
     errors = []
     current_path = None
 
-    root_to_abbrev = {
-        "HKEY_CLASSES_ROOT": "HKCR",
-        "HKEY_CURRENT_USER": "HKCU",
-        "HKEY_LOCAL_MACHINE": "HKLM",
-        "HKEY_USERS": "HKU",
-        "HKEY_CURRENT_CONFIG": "HKCC",
-    }
-
     for line in reg_text.splitlines():
         line = line.strip()
         if not line or line.startswith("Windows Registry Editor"):
@@ -156,7 +150,7 @@ def import_reg(reg_text):
             full_path = section_match.group(1)
             parts = full_path.split("\\", 1)
             root_str = parts[0].upper()
-            abbrev = root_to_abbrev.get(root_str)
+            abbrev = _ROOT_TO_ABBREV.get(root_str)
             if abbrev is None:
                 errors.append(f"不支持的注册表根: {root_str}")
                 current_path = None

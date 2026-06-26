@@ -14,7 +14,5 @@ def get_network_info():
         result.append({
             "name": a.get("Description", ""),
             "ip": ip,
-            "dns": [],  # ponytail: DNS via separate query adds complexity for little value
-            "speed": "",
         })
     return {"adapters": result}
