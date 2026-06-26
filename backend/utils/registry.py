@@ -81,6 +81,8 @@ def list_subkeys(reg_path):
         while True:
             try:
                 name, data, reg_type = winreg.EnumValue(key, i)
+                if isinstance(data, bytes):
+                    data = data.hex()
                 values.append({"name": name, "data": data, "type_int": reg_type})
                 i += 1
             except OSError:

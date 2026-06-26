@@ -1,7 +1,8 @@
-from flask import Flask, jsonify, request, send_from_directory
+from flask import Flask, jsonify, request, send_from_directory, Response
 import ctypes
 import os
 import sys
+import json
 
 
 def require_admin():
@@ -29,11 +30,13 @@ def static_files(path):
 
 
 def ok(data=None):
-    return jsonify({"status": "ok", "data": data})
+    payload = json.dumps({"status": "ok", "data": data}, ensure_ascii=False)
+    return Response(payload, mimetype="application/json; charset=utf-8")
 
 
 def error(message):
-    return jsonify({"status": "error", "error": message})
+    payload = json.dumps({"status": "error", "error": message}, ensure_ascii=False)
+    return Response(payload, mimetype="application/json; charset=utf-8")
 
 
 # ---- 系统信息 ----
