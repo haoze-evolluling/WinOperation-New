@@ -39,11 +39,11 @@
             <!-- 系统清理 -->
             <section id="panel-cleanup" class="panel">
                 <h2>系统清理</h2>
-                <div class="cleanup-actions">
+                <div class="cleanup-actions glass">
                     <button class="btn btn-primary" onclick="doScanCleanup()">扫描可清理项</button>
                     <button class="btn btn-danger" onclick="doCleanupSelected()" id="cleanup-execute-btn" disabled>清理选中项</button>
                 </div>
-                <div id="cleanup-categories" class="cleanup-categories"></div>
+                <div id="cleanup-categories" class="cleanup-categories glass"></div>
                 <div id="cleanup-result" class="result-area"></div>
             </section>
 
@@ -58,25 +58,25 @@
             <section id="panel-registry" class="panel">
                 <h2>注册表操作</h2>
                 <div class="reg-layout">
-                    <div class="reg-sidebar">
+                    <div class="reg-sidebar glass">
                         <input type="text" id="reg-tree-path" placeholder="路径 (如 HKCU\Software)" value="HKCU">
                         <button class="btn btn-secondary btn-sm" onclick="loadRegTree()">加载</button>
                         <div id="reg-tree" class="reg-tree"></div>
                     </div>
                     <div class="reg-main">
-                        <div class="reg-toolbar">
+                        <div class="reg-toolbar glass">
                             <button class="btn btn-primary" onclick="refreshRegValues()">刷新</button>
                             <button class="btn btn-success" onclick="showRegWriteForm()">新建/修改值</button>
                             <button class="btn btn-secondary" onclick="exportCurrentReg()">导出 .reg</button>
                             <button class="btn btn-secondary" onclick="importRegFile()">导入 .reg</button>
                             <input type="file" id="reg-import-file" accept=".reg" style="display:none" onchange="doImportReg(event)">
                         </div>
-                        <div id="reg-path-display" class="reg-path-display">HKCU</div>
+                        <div id="reg-path-display" class="reg-path-display glass">HKCU</div>
                         <table class="table">
                             <thead><tr><th>名称</th><th>类型</th><th>数据</th><th>操作</th></tr></thead>
                             <tbody id="reg-values-body"></tbody>
                         </table>
-                        <div id="reg-write-form" class="reg-write-form" style="display:none">
+                        <div id="reg-write-form" class="reg-write-form glass" style="display:none">
                             <input type="text" id="reg-write-key" placeholder="键名">
                             <select id="reg-write-type">
                                 <option value="REG_SZ">REG_SZ</option>

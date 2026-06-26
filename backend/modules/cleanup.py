@@ -6,18 +6,6 @@ import ctypes
 from ctypes import wintypes
 
 
-def _dir_size(path):
-    total = 0
-    for dirpath, dirnames, filenames in os.walk(path):
-        for f in filenames:
-            fp = os.path.join(dirpath, f)
-            try:
-                total += os.path.getsize(fp)
-            except OSError:
-                pass
-    return total
-
-
 def _scan_dir(path):
     file_count = 0
     size_bytes = 0
@@ -27,8 +15,9 @@ def _scan_dir(path):
                 size_bytes += entry.stat().st_size
                 file_count += 1
             elif entry.is_dir():
-                size_bytes += _dir_size(entry.path)
-                file_count += 1
+                fc, sb = _scan_dir(entry.path)
+                file_count += fc
+                size_bytes += sb
         except (PermissionError, OSError):
             continue
     return file_count, size_bytes
@@ -97,17 +86,20 @@ CATEGORIES = [
 _CATEGORY_BY_ID = {c["id"]: c for c in CATEGORIES}
 
 
-def do_cleanup_temp(payload):
-    cleaned = []
-    failed = []
-    freed = [0]
-    _cleanup_dirs(CATEGORIES[0]["paths"], "temp_files", cleaned, failed, freed)
-    freed_mb = round(freed[0] / (1024 * 1024), 1)
-    return {
-        "cleaned_paths": [c["path"] for c in cleaned],
-        "freed_mb": freed_mb,
-        "message": f"清理完成，释放 {freed_mb} MB",
-    }
+def _browser_cache_paths():
+    paths = list(CATEGORIES[1]["paths"])
+    firefox_profile = os.path.expandvars(r"%LOCALAPPDATA%\Mozilla\Firefox\Profiles")
+    if os.path.isdir(firefox_profile):
+        for profile_dir in glob.glob(os.path.join(firefox_profile, "*", "cache2")):
+            paths.append(profile_dir)
+    return paths
+
+
+def _thumbnail_paths():
+    explorer_dir = CATEGORIES[2]["paths"][0]
+    if os.path.isdir(explorer_dir):
+        return glob.glob(os.path.join(explorer_dir, "thumbcache_*"))
+    return []
 
 
 def scan_cleanup_categories():
@@ -115,23 +107,28 @@ def scan_cleanup_categories():
     for cat in CATEGORIES:
         file_count = 0
         size_bytes = 0
-        scan_paths = list(cat["paths"])
 
         if cat["id"] == "browser_cache":
-            firefox_profile = os.path.expandvars(r"%LOCALAPPDATA%\Mozilla\Firefox\Profiles")
-            if os.path.isdir(firefox_profile):
-                for profile_dir in glob.glob(os.path.join(firefox_profile, "*", "cache2")):
-                    scan_paths.append(profile_dir)
+            scan_paths = _browser_cache_paths()
         elif cat["id"] == "thumbnail_cache":
-            explorer_dir = cat["paths"][0]
-            if os.path.isdir(explorer_dir):
-                for thumb_file in glob.glob(os.path.join(explorer_dir, "thumbcache_*")):
-                    try:
-                        size = os.path.getsize(thumb_file)
-                        file_count += 1
-                        size_bytes += size
-                    except OSError:
-                        continue
+            scan_paths = _thumbnail_paths()
+            for thumb_file in scan_paths:
+                try:
+                    size = os.path.getsize(thumb_file)
+                    file_count += 1
+                    size_bytes += size
+                except OSError:
+                    continue
+            result.append({
+                "id": cat["id"],
+                "name": cat["name"],
+                "description": cat["description"],
+                "file_count": file_count,
+                "size_bytes": size_bytes,
+                "size_mb": round(size_bytes / (1024 * 1024), 1),
+                "paths": scan_paths,
+            })
+            continue
         elif cat["id"] == "recycle_bin":
             try:
                 rb_size, rb_count = _get_recycle_bin_info()
@@ -152,6 +149,8 @@ def scan_cleanup_categories():
                 "paths": scan_paths,
             })
             continue
+        else:
+            scan_paths = list(cat["paths"])
 
         for path in scan_paths:
             if not os.path.isdir(path):
@@ -185,10 +184,7 @@ def _cleanup_dirs(dirs, category, cleaned, failed, total_freed_bytes):
                     total_freed_bytes[0] += size
                     cleaned.append({"category": category, "path": entry.path, "size_mb": round(size / (1024 * 1024), 1)})
                 elif entry.is_dir():
-                    dir_size = _dir_size(entry.path)
                     shutil.rmtree(entry.path)
-                    total_freed_bytes[0] += dir_size
-                    cleaned.append({"category": category, "path": entry.path, "size_mb": round(dir_size / (1024 * 1024), 1)})
             except (PermissionError, OSError) as e:
                 failed.append({"category": category, "path": entry.path, "error": str(e)})
 
@@ -204,24 +200,17 @@ def execute_cleanup(category_ids):
             continue
 
         if cat_id == "browser_cache":
-            cache_dirs = list(cat["paths"])
-            firefox_profile = os.path.expandvars(r"%LOCALAPPDATA%\Mozilla\Firefox\Profiles")
-            if os.path.isdir(firefox_profile):
-                for profile_dir in glob.glob(os.path.join(firefox_profile, "*", "cache2")):
-                    cache_dirs.append(profile_dir)
-            _cleanup_dirs(cache_dirs, cat_id, cleaned, failed, total_freed_bytes)
+            _cleanup_dirs(_browser_cache_paths(), cat_id, cleaned, failed, total_freed_bytes)
 
         elif cat_id == "thumbnail_cache":
-            explorer_dir = cat["paths"][0]
-            if os.path.isdir(explorer_dir):
-                for thumb_file in glob.glob(os.path.join(explorer_dir, "thumbcache_*")):
-                    try:
-                        size = os.path.getsize(thumb_file)
-                        os.remove(thumb_file)
-                        total_freed_bytes[0] += size
-                        cleaned.append({"category": cat_id, "path": thumb_file, "size_mb": round(size / (1024 * 1024), 1)})
-                    except (PermissionError, OSError) as e:
-                        failed.append({"category": cat_id, "path": thumb_file, "error": str(e)})
+            for thumb_file in _thumbnail_paths():
+                try:
+                    size = os.path.getsize(thumb_file)
+                    os.remove(thumb_file)
+                    total_freed_bytes[0] += size
+                    cleaned.append({"category": cat_id, "path": thumb_file, "size_mb": round(size / (1024 * 1024), 1)})
+                except (PermissionError, OSError) as e:
+                    failed.append({"category": cat_id, "path": thumb_file, "error": str(e)})
 
         elif cat_id == "recycle_bin":
             try:

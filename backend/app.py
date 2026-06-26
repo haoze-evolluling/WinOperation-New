@@ -44,13 +44,6 @@ def system_info():
 
 
 # ---- 系统清理 ----
-@app.route("/api/cleanup/temp-files", methods=["POST"])
-def cleanup_temp_files():
-    from modules.cleanup import do_cleanup_temp
-    result = do_cleanup_temp(request.json or {})
-    return ok(result)
-
-
 @app.route("/api/cleanup/scan", methods=["POST"])
 def scan_cleanup():
     from modules.cleanup import scan_cleanup_categories
@@ -86,74 +79,133 @@ def toggle_service(name):
 # ---- 注册表 ----
 @app.route("/api/registry/read/<path:reg_path>", methods=["GET"])
 def registry_read(reg_path):
-    from modules.registry import read_registry
+    from utils.registry import read_key, TYPE_MAP
     reg_path = reg_path.replace("/", "\\")
     key_name = request.args.get("key", "")
-    value = read_registry(reg_path, key_name)
-    return ok(value)
+    try:
+        data, reg_type = read_key(reg_path, key_name)
+        return ok({"value": data, "type": TYPE_MAP.get(reg_type, f"REG_UNKNOWN({reg_type})")})
+    except Exception as e:
+        return error(str(e))
 
 
 @app.route("/api/registry/write/<path:reg_path>", methods=["POST"])
 def registry_write(reg_path):
-    from modules.registry import write_registry
+    import win32con
+    from utils.registry import write_key, REVERSE_TYPE_MAP
     reg_path = reg_path.replace("/", "\\")
     payload = request.json or {}
-    result = write_registry(reg_path, payload.get("key", ""), payload.get("value", ""), payload.get("type", "REG_SZ"))
-    return ok(result)
+    type_int = REVERSE_TYPE_MAP.get(payload.get("type", "REG_SZ"), win32con.REG_SZ)
+    try:
+        write_key(reg_path, payload.get("key", ""), payload.get("value", ""), type_int)
+        return ok({"message": "写入成功"})
+    except Exception as e:
+        return error(str(e))
 
 
 @app.route("/api/registry/list/<path:reg_path>", methods=["GET"])
 def registry_list(reg_path):
-    from modules.registry import list_registry
+    from utils.registry import list_subkeys, TYPE_MAP
     reg_path = reg_path.replace("/", "\\")
-    result = list_registry(reg_path)
-    return ok(result)
+    try:
+        raw = list_subkeys(reg_path)
+        values = [{"name": v["name"], "data": v["data"], "type": TYPE_MAP.get(v["type_int"], f"REG_UNKNOWN({v['type_int']})")} for v in raw["values"]]
+        return ok({"subkeys": raw["subkeys"], "values": values})
+    except Exception as e:
+        return error(str(e))
 
 
 @app.route("/api/registry/tree/<path:reg_path>", methods=["GET"])
 def registry_tree(reg_path):
-    from modules.registry import tree_registry
+    from utils.registry import tree_subkeys
     reg_path = reg_path.replace("/", "\\")
     depth = int(request.args.get("depth", 2))
-    result = tree_registry(reg_path, max_depth=min(depth, 10))
-    return ok(result)
+    try:
+        tree = tree_subkeys(reg_path, max_depth=min(depth, 10))
+        return ok(tree)
+    except Exception as e:
+        return error(str(e))
 
 
 @app.route("/api/registry/batch-read", methods=["POST"])
 def registry_batch_read():
-    from modules.registry import batch_read_registry
+    from utils.registry import read_key, TYPE_MAP
     payload = request.json or {}
     entries = payload.get("entries", [])
-    result = batch_read_registry(entries)
-    return ok(result)
+    results = []
+    for entry in entries:
+        try:
+            data, reg_type = read_key(entry["path"], entry.get("key", ""))
+            results.append({
+                "path": entry["path"],
+                "key": entry.get("key", ""),
+                "value": data,
+                "type": TYPE_MAP.get(reg_type, f"REG_UNKNOWN({reg_type})"),
+                "status": "ok",
+            })
+        except Exception as e:
+            results.append({
+                "path": entry["path"],
+                "key": entry.get("key", ""),
+                "value": None,
+                "type": None,
+                "status": "error",
+                "error": str(e),
+            })
+    return ok({"results": results})
 
 
 @app.route("/api/registry/batch-write", methods=["POST"])
 def registry_batch_write():
-    from modules.registry import batch_write_registry
+    import win32con
+    from utils.registry import write_key, REVERSE_TYPE_MAP
     payload = request.json or {}
     entries = payload.get("entries", [])
-    result = batch_write_registry(entries)
-    return ok(result)
+    results = []
+    for entry in entries:
+        try:
+            type_int = REVERSE_TYPE_MAP.get(entry.get("type", "REG_SZ"), win32con.REG_SZ)
+            write_key(entry["path"], entry.get("key", ""), entry.get("value", ""), type_int)
+            results.append({
+                "path": entry["path"],
+                "key": entry.get("key", ""),
+                "value": entry.get("value", ""),
+                "type": entry.get("type", "REG_SZ"),
+                "status": "ok",
+            })
+        except Exception as e:
+            results.append({
+                "path": entry["path"],
+                "key": entry.get("key", ""),
+                "value": entry.get("value", ""),
+                "type": entry.get("type", "REG_SZ"),
+                "status": "error",
+                "error": str(e),
+            })
+    return ok({"results": results})
 
 
 @app.route("/api/registry/export", methods=["POST"])
 def registry_export():
-    from modules.registry import export_registry
+    from utils.registry import export_reg
     payload = request.json or {}
     reg_path = payload.get("path", "")
-    result = export_registry(reg_path)
-    if result.get("status") == "error":
-        return ok(result)
-    return ok({"content": result["content"]})
+    try:
+        content = export_reg(reg_path)
+        return ok({"content": content})
+    except Exception as e:
+        return error(str(e))
 
 
 @app.route("/api/registry/import", methods=["POST"])
 def registry_import():
-    from modules.registry import import_registry
+    from utils.registry import import_reg
     reg_text = request.data.decode("utf-8") if request.data else ""
-    result = import_registry(reg_text)
-    return ok(result)
+    try:
+        result = import_reg(reg_text)
+        return ok(result)
+    except Exception as e:
+        return error(str(e))
 
 
 # ---- 网络 ----

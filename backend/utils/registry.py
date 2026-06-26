@@ -12,6 +12,14 @@ _ABBREV_TO_FULL = {
 }
 _ROOT_TO_ABBREV = {v: k for k, v in _ABBREV_TO_FULL.items()}
 
+TYPE_MAP = {
+    win32con.REG_SZ: "REG_SZ",
+    win32con.REG_DWORD: "REG_DWORD",
+    win32con.REG_BINARY: "REG_BINARY",
+    win32con.REG_MULTI_SZ: "REG_MULTI_STRING",
+}
+REVERSE_TYPE_MAP = {v: k for k, v in TYPE_MAP.items()}
+
 
 def _parse_root(reg_path):
     parts = reg_path.split("\\", 1)

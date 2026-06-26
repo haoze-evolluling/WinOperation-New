@@ -6,7 +6,6 @@ from unittest.mock import patch, MagicMock, call
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "backend"))
 
 from utils.registry import list_subkeys, tree_subkeys
-from modules.registry import list_registry, tree_registry, batch_read_registry, batch_write_registry
 import win32api
 
 
@@ -62,48 +61,5 @@ class TestTreeSubkeys:
     def test_tree_subkeys_error_returns_error_status(self, mock_list):
         mock_list.side_effect = Exception("access denied")
 
-        result = tree_registry("HKCU\\Software\\Bad", max_depth=2)
-
-        assert result["status"] == "error"
-
-
-class TestBatchReadRegistry:
-    def test_batch_read_multiple_entries(self):
-        entries = [
-            {"path": "HKCU\\Software\\Test", "key": "Val1"},
-            {"path": "HKCU\\Software\\Test", "key": "Val2"},
-            {"path": "HKCU\\Software\\Test", "key": "Val3"},
-        ]
-
-        with patch("modules.registry.read_key") as mock_read:
-            mock_read.side_effect = [
-                ("data1", 1),
-                ("data2", 2),
-                ("data3", 1),
-            ]
-            result = batch_read_registry(entries)
-
-        assert "results" in result
-        assert len(result["results"]) == 3
-        for item in result["results"]:
-            assert "path" in item
-            assert "key" in item
-            assert "value" in item
-            assert "type" in item
-            assert "status" in item
-
-
-class TestBatchWriteRegistry:
-    def test_batch_write_returns_status(self):
-        entries = [
-            {"path": "HKCU\\Software\\Test", "key": "Val1", "value": "x", "type": "REG_SZ"},
-            {"path": "HKCU\\Software\\Test", "key": "Val2", "value": "y", "type": "REG_SZ"},
-        ]
-
-        with patch("modules.registry.write_key") as mock_write:
-            result = batch_write_registry(entries)
-
-        assert "results" in result
-        assert len(result["results"]) == 2
-        for item in result["results"]:
-            assert item["status"] == "ok"
+        with pytest.raises(Exception):
+            tree_subkeys("HKCU\\Software\\Bad", max_depth=2)

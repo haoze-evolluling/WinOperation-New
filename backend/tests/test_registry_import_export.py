@@ -8,7 +8,6 @@ import win32con
 sys.path.insert(0, os.path.join(os.path.dirname(__file__), "..", "..", "backend"))
 
 from utils.registry import export_reg, import_reg
-from modules.registry import export_registry, import_registry
 
 
 class TestExportReg:
@@ -133,28 +132,3 @@ this is not a valid line
         assert result["imported"] == 2
         assert len(result["errors"]) >= 1
         assert "not a valid line" in result["errors"][0] or len(result["errors"]) > 0
-
-
-class TestExportRegistryWrapper:
-    @patch("utils.registry.list_subkeys")
-    def test_export_registry_returns_content_and_path(self, mock_list):
-        mock_list.return_value = {
-            "subkeys": [],
-            "values": [],
-        }
-
-        result = export_registry("HKCU\\Software\\MyApp")
-
-        assert "content" in result
-        assert "path" in result
-        assert result["path"] == "HKCU\\Software\\MyApp"
-
-
-class TestImportRegistryWrapper:
-    @patch("modules.registry.write_key")
-    def test_import_registry_wraps_import_reg(self, mock_write):
-        reg_text = 'Windows Registry Editor Version 5.00\n\n[HKEY_CURRENT_USER\\Software\\MyApp]\n"Val"="x"\n'
-
-        result = import_registry(reg_text)
-
-        assert "imported" in result

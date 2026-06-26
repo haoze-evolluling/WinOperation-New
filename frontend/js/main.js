@@ -60,9 +60,9 @@ async function loadDashboard() {
     if (data.status !== "ok") { container.textContent = JSON.stringify(data); return; }
     const d = data.data;
     container.innerHTML = `
-        <div class="card"><div class="card-title">CPU</div><div class="card-value">${d.cpu.usage}%</div><div>${d.cpu.name}</div></div>
-        <div class="card"><div class="card-title">内存</div><div class="card-value">${d.memory.percent}%</div><div>${d.memory.used_gb} / ${d.memory.total_gb} GB</div></div>
-        <div class="card"><div class="card-title">运行时间</div><div class="card-value" style="font-size:1.2em">${d.uptime}</div></div>
+        <div class="card glass"><div class="card-title">CPU</div><div class="card-value">${d.cpu.usage}%</div><div>${d.cpu.name}</div></div>
+        <div class="card glass"><div class="card-title">内存</div><div class="card-value">${d.memory.percent}%</div><div>${d.memory.used_gb} / ${d.memory.total_gb} GB</div></div>
+        <div class="card glass"><div class="card-title">运行时间</div><div class="card-value" style="font-size:1.2em">${d.uptime}</div></div>
     `;
 }
 
@@ -71,8 +71,8 @@ async function loadSystemInfo() {
     const container = document.getElementById("system-info-content");
     if (data.status !== "ok") { container.textContent = JSON.stringify(data, null, 2); return; }
     const d = data.data;
-    let html = `<h3>CPU</h3><p>${d.cpu.name} - ${d.cpu.cores} 核 - 使用率 ${d.cpu.usage}%</p>`;
-    html += `<h3>内存</h3><p>已用 ${d.memory.used_gb} GB / ${d.memory.total_gb} GB (${d.memory.percent}%)</p>`;
+    let html = `<h3 class="glass">CPU</h3><p class="glass">${d.cpu.name} - ${d.cpu.cores} 核 - 使用率 ${d.cpu.usage}%</p>`;
+    html += `<h3 class="glass">内存</h3><p class="glass">已用 ${d.memory.used_gb} GB / ${d.memory.total_gb} GB (${d.memory.percent}%)</p>`;
     html += `<h3>磁盘</h3><table><tr><th>盘符</th><th>总容量</th><th>可用</th><th>使用率</th></tr>`;
     d.disk.forEach(disk => {
         html += `<tr><td>${disk.drive}</td><td>${disk.total_gb} GB</td><td>${disk.free_gb} GB</td><td>${disk.percent}%</td></tr>`;
@@ -84,7 +84,7 @@ async function loadSystemInfo() {
 async function doScanCleanup() {
     const result = await api("/api/cleanup/scan", { method: "POST", body: JSON.stringify({}) });
     const container = document.getElementById("cleanup-result");
-    if (result.status !== "ok") { container.innerHTML = `<div class="result-card error"><strong>错误</strong> — ${result.error || '操作失败'}</div>`; return; }
+    if (result.status !== "ok") { container.innerHTML = `<div class="result-card glass error"><strong>错误</strong> — ${result.error || '操作失败'}</div>`; return; }
     renderCleanupCategories(result.data);
 }
 
@@ -117,21 +117,21 @@ async function doCleanupSelected() {
     if (ids.length === 0) return;
     const result = await api("/api/cleanup/execute", { method: "POST", body: JSON.stringify({ categories: ids }) });
     const container = document.getElementById("cleanup-result");
-    if (result.status !== "ok") { container.innerHTML = `<div class="result-card error"><strong>错误</strong> — ${result.error || '操作失败'}</div>`; return; }
+    if (result.status !== "ok") { container.innerHTML = `<div class="result-card glass error"><strong>错误</strong> — ${result.error || '操作失败'}</div>`; return; }
     renderCleanupResult(result.data);
 }
 
 function renderCleanupResult(data) {
     const container = document.getElementById("cleanup-result");
-    let html = `<div class="result-card success"><strong>清理完成</strong> — 共释放 ${data.total_freed_mb} MB</div>`;
+    let html = `<div class="result-card glass success"><strong>清理完成</strong> — 共释放 ${data.total_freed_mb} MB</div>`;
     if (data.cleaned && data.cleaned.length > 0) {
-        html += `<div class="result-card"><strong>已清理项目 (${data.cleaned.length})</strong>
+        html += `<div class="result-card glass"><strong>已清理项目 (${data.cleaned.length})</strong>
             <ul class="result-list">
                 ${data.cleaned.map(c => `<li class="result-list-item">${c.path} (${c.size_mb} MB)</li>`).join("")}
             </ul></div>`;
     }
     if (data.failed && data.failed.length > 0) {
-        html += `<div class="result-card error"><strong>失败项目 (${data.failed.length})</strong>
+        html += `<div class="result-card glass error"><strong>失败项目 (${data.failed.length})</strong>
             <ul class="result-list">
                 ${data.failed.map(f => `<li class="result-list-item">${f.path}: ${f.error}</li>`).join("")}
             </ul></div>`;
@@ -147,7 +147,7 @@ async function loadPerformance() {
     const grid = container.querySelector(".service-cards");
     data.data.services.forEach(s => {
         const card = document.createElement("div");
-        card.className = "service-card";
+        card.className = "service-card glass";
         card.innerHTML = `
             <div class="service-card-header">
                 <span class="service-card-name">${s.name}</span>
@@ -170,9 +170,9 @@ async function toggleService(name, action) {
     });
     const resultContainer = document.getElementById("performance-result");
     if (result.status === "ok") {
-        resultContainer.innerHTML = `<div class="result-card success"><strong>${result.data.message}</strong></div>`;
+        resultContainer.innerHTML = `<div class="result-card glass success"><strong>${result.data.message}</strong></div>`;
     } else {
-        resultContainer.innerHTML = `<div class="result-card error"><strong>错误</strong> — ${result.error || '操作失败'}</div>`;
+        resultContainer.innerHTML = `<div class="result-card glass error"><strong>错误</strong> — ${result.error || '操作失败'}</div>`;
     }
     loadPerformance();
 }
@@ -181,8 +181,8 @@ async function loadRegTree() {
     const basePath = document.getElementById("reg-tree-path").value || "HKCU";
     const data = await api(`/api/registry/tree/${encodeURIComponent(basePath)}?depth=2`);
     const container = document.getElementById("reg-tree");
-    if (data.status !== "ok") { container.innerHTML = `<div class="result-card error"><strong>错误</strong> — 加载失败</div>`; return; }
-    if (data.data.status === "error") { container.innerHTML = `<div class="result-card error"><strong>错误</strong> — ${data.data.error}</div>`; return; }
+    if (result.status !== "ok") { container.innerHTML = `<div class="result-card glass error"><strong>错误</strong> — 加载失败</div>`; return; }
+    if (data.data.status === "error") { container.innerHTML = `<div class="result-card glass error"><strong>错误</strong> — ${data.data.error}</div>`; return; }
     const tree = data.data.tree;
     if (!tree || !tree.children) { container.innerHTML = `<div class="result-card warning"><strong>提示</strong> — 该路径下没有子项</div>`; return; }
     container.innerHTML = "";
@@ -192,7 +192,7 @@ async function loadRegTree() {
 function renderRegTree(tree, depth, parentPath, container) {
     tree.forEach(node => {
         const div = document.createElement("div");
-        div.className = "reg-tree-node";
+        div.className = "reg-tree-node glass";
         div.style.paddingLeft = `${depth * 16 + 8}px`;
         div.textContent = node.name;
         div.title = node.path || parentPath + "\\" + node.name;
@@ -252,11 +252,11 @@ async function writeReg() {
     });
     const container = document.getElementById("registry-result");
     if (result.status !== "ok") {
-        container.innerHTML = `<div class="result-card error"><strong>错误</strong> — ${result.error || '写入失败'}</div>`;
+        container.innerHTML = `<div class="result-card glass error"><strong>错误</strong> — ${result.error || '写入失败'}</div>`;
         hideRegWriteForm();
         return;
     }
-    container.innerHTML = `<div class="result-card success">写入成功</div>`;
+    container.innerHTML = `<div class="result-card glass success">写入成功</div>`;
     hideRegWriteForm();
     refreshRegValues();
 }
@@ -296,9 +296,9 @@ async function doImportReg(event) {
     const result = await res.json();
     const container = document.getElementById("registry-result");
     if (result.status === "ok") {
-        container.innerHTML = `<div class="result-card success">导入成功</div>`;
+        container.innerHTML = `<div class="result-card glass success">导入成功</div>`;
     } else {
-        container.innerHTML = `<div class="result-card error">导入失败</div>`;
+        container.innerHTML = `<div class="result-card glass error">导入失败</div>`;
     }
     event.target.value = "";
 }
