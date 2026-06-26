@@ -4,7 +4,12 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>WinOperation</title>
-    <link rel="stylesheet" href="/css/style.css">
+    <link rel="stylesheet" href="/css/variables.css">
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/components.css">
+    <link rel="stylesheet" href="/css/registry.css">
+    <link rel="stylesheet" href="/css/cleanup.css">
+    <link rel="stylesheet" href="/css/performance.css">
 </head>
 <body>
     <div class="container">
@@ -59,8 +64,11 @@
                 <h2>注册表操作</h2>
                 <div class="reg-layout">
                     <div class="reg-sidebar glass">
-                        <input type="text" id="reg-tree-path" placeholder="路径 (如 HKCU\Software)" value="HKCU">
-                        <button class="btn btn-secondary btn-sm" onclick="loadRegTree()">加载</button>
+                        <div class="reg-sidebar-label">注册表目录</div>
+                        <div class="form-group">
+                            <input type="text" id="reg-tree-path" placeholder="路径 (如 HKCU\Software)" value="HKCU">
+                            <button class="btn btn-secondary btn-sm" onclick="loadRegTree()">加载</button>
+                        </div>
                         <div id="reg-tree" class="reg-tree"></div>
                     </div>
                     <div class="reg-main">
@@ -99,6 +107,15 @@
             </section>
         </main>
     </div>
+    <script src="/js/api.js"></script>
+    <script src="/js/theme.js"></script>
+    <script src="/js/navigation.js"></script>
+    <script src="/js/dashboard.js"></script>
+    <script src="/js/system-info.js"></script>
+    <script src="/js/cleanup.js"></script>
+    <script src="/js/performance.js"></script>
+    <script src="/js/registry.js"></script>
+    <script src="/js/network.js"></script>
     <script src="/js/main.js"></script>
 </body>
 </html>

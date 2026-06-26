@@ -200,6 +200,30 @@ def registry_export():
         return error(str(e))
 
 
+@app.route("/api/registry/delete-value/<path:reg_path>", methods=["POST"])
+def registry_delete_value(reg_path):
+    from utils.registry import delete_value
+    reg_path = reg_path.replace("/", "\\")
+    payload = request.json or {}
+    key_name = payload.get("key", "")
+    try:
+        delete_value(reg_path, key_name)
+        return ok({"message": "删除成功"})
+    except Exception as e:
+        return error(str(e))
+
+
+@app.route("/api/registry/delete-key/<path:reg_path>", methods=["POST"])
+def registry_delete_key(reg_path):
+    from utils.registry import delete_key
+    reg_path = reg_path.replace("/", "\\")
+    try:
+        delete_key(reg_path)
+        return ok({"message": "删除成功"})
+    except Exception as e:
+        return error(str(e))
+
+
 @app.route("/api/registry/import", methods=["POST"])
 def registry_import():
     from utils.registry import import_reg

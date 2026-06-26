@@ -145,6 +145,29 @@ def _reg_path_to_string(reg_path):
     return root_name
 
 
+def delete_value(reg_path, value_name):
+    root, sub_path = _parse_root(reg_path)
+    key = None
+    try:
+        key = win32api.RegOpenKeyEx(root, sub_path, 0, win32con.KEY_SET_VALUE)
+        win32api.RegDeleteValue(key, value_name)
+    finally:
+        if key:
+            win32api.RegCloseKey(key)
+
+
+def delete_key(reg_path):
+    root, sub_path = _parse_root(reg_path)
+    parent_path, name = sub_path.rsplit("\\", 1) if "\\" in sub_path else ("", sub_path)
+    parent_key = None
+    try:
+        parent_key = win32api.RegOpenKeyEx(root, parent_path, 0, win32con.KEY_ALL_ACCESS)
+        win32api.RegDeleteKey(parent_key, name)
+    finally:
+        if parent_key:
+            win32api.RegCloseKey(parent_key)
+
+
 def import_reg(reg_text):
     imported = 0
     failed = []
