@@ -181,7 +181,7 @@ async function loadRegTree() {
     const basePath = document.getElementById("reg-tree-path").value || "HKCU";
     const data = await api(`/api/registry/tree/${encodeURIComponent(basePath)}?depth=2`);
     const container = document.getElementById("reg-tree");
-    if (result.status !== "ok") { container.innerHTML = `<div class="result-card glass error"><strong>错误</strong> — 加载失败</div>`; return; }
+    if (data.status !== "ok") { container.innerHTML = `<div class="result-card glass error"><strong>错误</strong> — 加载失败</div>`; return; }
     if (data.data.status === "error") { container.innerHTML = `<div class="result-card glass error"><strong>错误</strong> — ${data.data.error}</div>`; return; }
     const tree = data.data.tree;
     if (!tree || !tree.children) { container.innerHTML = `<div class="result-card warning"><strong>提示</strong> — 该路径下没有子项</div>`; return; }
