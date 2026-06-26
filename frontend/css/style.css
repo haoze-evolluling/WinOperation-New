@@ -10,7 +10,7 @@
     --bg-layer1: #FFFFFF;
     --bg-layer2: #F5F5F5;
     --bg-layer3: #EDEDED;
-    --bg-sidebar: rgba(243, 243, 243, 0.82);
+    --bg-sidebar: rgba(243, 243, 243, 0.92);
     --bg-input: #FFFFFF;
 
     --border-subtle: rgba(0, 0, 0, 0.05);
@@ -33,8 +33,8 @@
     --transition-fast: 0.15s ease;
     --transition-normal: 0.25s ease;
 
-    --glass-bg: rgba(255, 255, 255, 0.62);
-    --glass-bg-strong: rgba(255, 255, 255, 0.82);
+    --glass-bg: rgba(255, 255, 255, 0.78);
+    --glass-bg-strong: rgba(255, 255, 255, 0.90);
     --glass-border: rgba(255, 255, 255, 0.35);
     --glass-border-subtle: rgba(255, 255, 255, 0.18);
     --glass-blur: 22px;
@@ -47,7 +47,7 @@
     --bg-layer1: #383838;
     --bg-layer2: #404040;
     --bg-layer3: #484848;
-    --bg-sidebar: rgba(32, 32, 32, 0.82);
+    --bg-sidebar: rgba(32, 32, 32, 0.92);
     --bg-input: #404040;
 
     --border-subtle: rgba(255, 255, 255, 0.05);
@@ -62,8 +62,8 @@
     --shadow-hover: 0 8px 24px rgba(0, 0, 0, 0.30), 0 0 1px rgba(0, 0, 0, 0.35);
     --shadow-sidebar: 4px 0 24px rgba(0, 0, 0, 0.20);
 
-    --glass-bg: rgba(48, 48, 48, 0.62);
-    --glass-bg-strong: rgba(48, 48, 48, 0.82);
+    --glass-bg: rgba(48, 48, 48, 0.78);
+    --glass-bg-strong: rgba(48, 48, 48, 0.90);
     --glass-border: rgba(255, 255, 255, 0.10);
     --glass-border-subtle: rgba(255, 255, 255, 0.05);
     --glass-blur: 22px;
@@ -71,24 +71,24 @@
     --glass-shadow-hover: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 1px rgba(0, 0, 0, 0.40);
 
     body {
-        background: linear-gradient(135deg, #1A1D23 0%, #22252B 40%, #1E2128 100%);
+        background: linear-gradient(rgba(26, 29, 35, 0.75), rgba(26, 29, 35, 0.75)), url('../background.png') center/cover no-repeat fixed;
     }
     body::before {
         background: radial-gradient(circle, rgba(0,120,212,0.22), transparent 70%);
-        opacity: 0.45;
+        opacity: 0.35;
     }
     body::after {
         background: radial-gradient(circle, rgba(100,160,240,0.16), transparent 70%);
-        opacity: 0.40;
+        opacity: 0.30;
     }
 
     tr:nth-child(even) td {
-        background: rgba(48, 48, 48, 0.45);
+        background: var(--glass-bg-strong);
     }
 
     .cleanup-actions,
     .reg-toolbar {
-        background: rgba(48, 48, 48, 0.35);
+        background: var(--glass-bg);
     }
 }
 
@@ -96,7 +96,7 @@
 
 body {
     font-family: "Segoe UI Variable", "Segoe UI", system-ui, -apple-system, sans-serif;
-    background: linear-gradient(135deg, #E8EDF5 0%, #F0F4FA 40%, #E3E8F1 100%);
+    background: linear-gradient(rgba(0, 0, 0, 0.12), rgba(0, 0, 0, 0.12)), url('../background.png') center/cover no-repeat fixed;
     color: var(--text-primary);
     position: relative;
     overflow-x: hidden;
@@ -111,7 +111,7 @@ body::after {
     position: fixed;
     border-radius: 50%;
     filter: blur(80px);
-    opacity: 0.55;
+    opacity: 0.35;
     pointer-events: none;
     z-index: -1;
 }
@@ -361,6 +361,21 @@ p {
     font-size: 0.95em;
 }
 
+#system-info-content > h3,
+#system-info-content > p {
+    background: var(--glass-bg-strong);
+    backdrop-filter: blur(var(--glass-blur));
+    padding: 8px 14px;
+    border-radius: var(--radius-sm);
+    border: 1px solid var(--glass-border);
+}
+#system-info-content > h3 {
+    margin-top: 16px;
+}
+#system-info-content > p {
+    margin-bottom: 4px;
+}
+
 table {
     width: 100%;
     border-collapse: separate;
@@ -390,7 +405,7 @@ th {
 }
 
 td { background: var(--glass-bg); color: var(--text-secondary); }
-tr:nth-child(even) td { background: rgba(255, 255, 255, 0.45); }
+tr:nth-child(even) td { background: var(--glass-bg-strong); }
 tr:last-child td { border-bottom: none; }
 
 .reg-layout {
@@ -435,6 +450,10 @@ tr:last-child td { border-bottom: none; }
     overflow: hidden;
     text-overflow: ellipsis;
     font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
+    background: var(--glass-bg);
+    backdrop-filter: blur(8px);
+    border: 1px solid transparent;
+    transition: all var(--transition-fast);
 }
 .reg-tree-node:hover {
     background: var(--accent-light);
@@ -455,7 +474,7 @@ tr:last-child td { border-bottom: none; }
     margin-bottom: 12px;
     flex-wrap: wrap;
     padding: 10px 12px;
-    background: rgba(255, 255, 255, 0.35);
+    background: var(--glass-bg);
     backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border-subtle);
     border-radius: var(--radius-lg);
@@ -533,7 +552,7 @@ tr:last-child td { border-bottom: none; }
     gap: 12px;
     margin-bottom: 20px;
     padding: 12px;
-    background: rgba(255, 255, 255, 0.35);
+    background: var(--glass-bg);
     backdrop-filter: blur(12px);
     border: 1px solid var(--glass-border-subtle);
     border-radius: var(--radius-lg);
