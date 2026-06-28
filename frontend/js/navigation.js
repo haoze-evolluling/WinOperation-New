@@ -1,10 +1,13 @@
-function activatePanel(panelName) {
+async function activatePanel(panelName) {
     document.querySelectorAll(".nav-item").forEach(i => i.classList.remove("active"));
     document.querySelectorAll(".panel").forEach(p => p.classList.remove("active"));
     document.querySelector(`.nav-item[data-panel="${panelName}"]`)?.classList.add("active");
     const panel = document.getElementById("panel-" + panelName);
     if (panel) panel.classList.add("active");
-    loadPanel(panelName);
+    await loadPanel(panelName);
+    if (window.animationsEngine) {
+        window.animationsEngine.animateEntrance(panel);
+    }
 }
 
 function restoreNavigation() {
