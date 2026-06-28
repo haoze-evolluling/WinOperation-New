@@ -11,7 +11,6 @@
     grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
     gap: 0;
     border-radius: var(--radius-lg);
-    box-shadow: var(--shadow-card);
     overflow: hidden;
 }
 .cleanup-category {
@@ -19,10 +18,8 @@
     border-right: 1px solid var(--border-standard);
     padding: 16px;
     border-radius: 0;
-    box-shadow: none;
 }
 .cleanup-category:hover {
-    box-shadow: none;
     transform: none;
 }
 .cleanup-category-header {

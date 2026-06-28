@@ -8,12 +8,10 @@
     border: 1px solid var(--border-standard);
     border-radius: var(--radius-lg);
     padding: 16px;
-    box-shadow: var(--shadow-card);
     transition: all var(--transition-fast);
     background: var(--bg-layer1);
 }
 .service-card:hover {
-    box-shadow: var(--shadow-hover);
     transform: translateY(-1px);
 }
 .service-card-header {

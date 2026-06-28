@@ -36,7 +36,6 @@
 }
 .reg-sidebar input:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--border-focus);
 }
 .reg-tree {
     margin-top: 8px;
@@ -134,7 +133,6 @@
     padding: 16px;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-standard);
-    box-shadow: var(--shadow-card);
     background: var(--bg-layer1);
 }
 .reg-write-form input,
@@ -154,7 +152,6 @@
 .reg-write-form input:focus,
 .reg-write-form select:focus {
     border-color: var(--accent);
-    box-shadow: 0 0 0 2px var(--border-focus);
 }
 .reg-type-badge {
     display: inline-block;
@@ -216,7 +213,6 @@
     font-weight: 500;
     z-index: 999;
     display: none;
-    box-shadow: var(--shadow-hover);
 }
 .reg-toast.success {
     background: var(--success);
@@ -257,7 +253,6 @@
 }
 [data-theme="dark"] .reg-sidebar input:focus {
     border-color: #1A86D9;
-    box-shadow: 0 0 0 2px rgba(0, 120, 212, 0.5);
 }
 [data-theme="dark"] .reg-write-form input,
 [data-theme="dark"] .reg-write-form select {

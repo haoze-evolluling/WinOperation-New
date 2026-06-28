@@ -1,7 +1,6 @@
 .glass {
     background: var(--bg-layer1);
     border: 1px solid var(--border-standard);
-    box-shadow: var(--shadow-card);
 }
 
 * { margin: 0; padding: 0; box-sizing: border-box; }
@@ -26,7 +25,6 @@ body {
     display: flex;
     flex-direction: column;
     border-right: 1px solid var(--border-standard);
-    box-shadow: var(--shadow-sidebar);
     position: sticky;
     top: 0;
     height: 100vh;
@@ -87,7 +85,6 @@ body {
 .theme-toggle:hover {
     border-color: var(--accent);
     color: var(--accent);
-    box-shadow: var(--shadow-card);
 }
 
 .theme-icon.moon { display: none; }
