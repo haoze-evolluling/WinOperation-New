@@ -1,25 +1,27 @@
 .reg-layout {
     display: flex;
-    gap: 10px;
+    gap: 16px;
     min-height: 400px;
 }
 .reg-sidebar {
-    width: 260px;
+    width: 280px;
     flex-shrink: 0;
-    padding: 16px;
+    padding: 20px;
     border-radius: var(--radius-lg);
     background: var(--bg-layer1);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
 }
 .reg-sidebar-label {
-    font-size: 0.8em;
-    font-weight: 600;
+    font-size: 0.75em;
+    font-weight: 700;
     text-transform: uppercase;
-    letter-spacing: 0.04em;
+    letter-spacing: 0.06em;
     color: var(--text-tertiary);
-    margin-bottom: 10px;
+    margin-bottom: 12px;
 }
 .reg-sidebar input {
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-standard);
     background: var(--bg-layer1);
@@ -27,6 +29,7 @@
     font-family: inherit;
     font-size: 0.9em;
     outline: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 .reg-sidebar .form-group input {
     flex: 1;
@@ -35,10 +38,11 @@
 }
 .reg-sidebar input:focus {
     border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
 }
 .reg-tree {
-    margin-top: 8px;
-    max-height: calc(100vh - 200px);
+    margin-top: 12px;
+    max-height: calc(100vh - 240px);
     overflow-y: auto;
     padding-right: 4px;
 }
@@ -57,7 +61,7 @@
     background: var(--text-tertiary);
 }
 .reg-tree-node {
-    padding: 5px 8px;
+    padding: 7px 10px;
     cursor: pointer;
     border-radius: var(--radius-sm);
     font-size: 0.9em;
@@ -68,6 +72,7 @@
     font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
     position: relative;
     border-left: 2px solid transparent;
+    transition: all var(--transition-fast);
 }
 .reg-tree-node:hover {
     background: var(--accent-light);
@@ -77,16 +82,17 @@
 .reg-tree-node.active {
     background: var(--accent-light);
     color: var(--accent);
-    font-weight: 500;
+    font-weight: 600;
     border-left-color: var(--accent);
 }
 .reg-tree-node .toggle {
     display: inline-block;
     width: 16px;
     text-align: center;
-    margin-right: 2px;
+    margin-right: 4px;
     font-size: 0.7em;
     color: var(--text-tertiary);
+    transition: transform var(--transition-fast);
 }
 .reg-tree-name {
 }
@@ -105,36 +111,40 @@
 }
 .reg-toolbar {
     display: flex;
-    gap: 8px;
-    margin-bottom: 12px;
+    gap: 10px;
+    margin-bottom: 16px;
     flex-wrap: wrap;
-    padding: 10px 12px;
+    padding: 12px 16px;
     border-radius: var(--radius-lg);
     background: var(--bg-layer1);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
 }
 .reg-path-display {
     font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
     font-size: 0.95em;
-    padding: 8px 12px;
-    border-radius: var(--radius-sm);
-    margin-bottom: 12px;
+    padding: 10px 14px;
+    border-radius: var(--radius-md);
+    margin-bottom: 16px;
     color: var(--accent);
     border: 1px solid var(--border-standard);
     background: var(--bg-layer1);
+    font-weight: 500;
 }
 .reg-write-form {
     display: flex;
-    gap: 8px;
+    gap: 10px;
     align-items: center;
-    margin-top: 16px;
-    padding: 16px;
+    margin-top: 20px;
+    padding: 20px;
     border-radius: var(--radius-lg);
     border: 1px solid var(--border-standard);
-    background: var(--bg-layer1);
+    background: var(--bg-layer2);
+    box-shadow: var(--shadow-sm);
 }
 .reg-write-form input,
 .reg-write-form select {
-    padding: 8px 12px;
+    padding: 10px 14px;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-standard);
     background: var(--bg-layer1);
@@ -144,20 +154,23 @@
     outline: none;
     appearance: none;
     -webkit-appearance: none;
+    transition: border-color var(--transition-fast), box-shadow var(--transition-fast);
 }
 .reg-write-form input:focus,
 .reg-write-form select:focus {
     border-color: var(--accent);
+    box-shadow: 0 0 0 3px var(--accent-light);
 }
 .reg-type-badge {
     display: inline-block;
-    padding: 2px 8px;
+    padding: 3px 10px;
     border-radius: var(--radius-sm);
     font-size: 0.75em;
-    font-weight: 600;
+    font-weight: 700;
     text-transform: uppercase;
     background: var(--accent-light);
     color: var(--accent);
+    letter-spacing: 0.02em;
 }
 
 .reg-value-data {
@@ -170,17 +183,19 @@
 }
 .reg-actions {
     display: flex;
-    gap: 6px;
+    gap: 8px;
 }
 .reg-actions button {
-    padding: 3px 10px;
-    font-size: 0.78em;
+    padding: 4px 12px;
+    font-size: 0.8em;
     border-radius: var(--radius-sm);
     border: 1px solid var(--border-standard);
     background: transparent;
     color: var(--text-secondary);
     cursor: pointer;
     font-family: inherit;
+    font-weight: 500;
+    transition: all var(--transition-fast);
 }
 .reg-actions .btn-copy:hover {
     border-color: var(--accent);
@@ -196,18 +211,20 @@
     color: var(--text-tertiary);
     font-style: italic;
     text-align: center;
-    padding: 24px;
+    padding: 32px;
+    font-size: 0.95em;
 }
 .reg-toast {
     position: fixed;
     bottom: 24px;
     right: 24px;
-    padding: 10px 20px;
+    padding: 12px 24px;
     border-radius: var(--radius-md);
     font-size: 0.9em;
-    font-weight: 500;
+    font-weight: 600;
     z-index: 999;
     display: none;
+    box-shadow: var(--shadow-lg);
 }
 .reg-toast.success {
     background: var(--success);

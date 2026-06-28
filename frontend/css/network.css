@@ -1,9 +1,9 @@
 .extra-ips {
-    font-size: 0.8em;
-    color: var(--text-tertiary);
-    margin-top: 6px;
+    font-size: 0.85em;
+    color: var(--text-secondary);
+    margin-top: 8px;
     word-break: break-all;
-    line-height: 1.4;
+    line-height: 1.6;
 }
 .span-2 {
     grid-column: span 2;
