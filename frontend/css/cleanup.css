@@ -19,9 +19,6 @@
     padding: 16px;
     border-radius: 0;
 }
-.cleanup-category:hover {
-    transform: none;
-}
 .cleanup-category-header {
     display: flex;
     align-items: center;

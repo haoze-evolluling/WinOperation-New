@@ -8,11 +8,7 @@
     border: 1px solid var(--border-standard);
     border-radius: var(--radius-lg);
     padding: 16px;
-    transition: all var(--transition-fast);
     background: var(--bg-layer1);
-}
-.service-card:hover {
-    transform: translateY(-1px);
 }
 .service-card-header {
     display: flex;
@@ -25,6 +21,10 @@
     font-weight: 500;
     color: var(--text-primary);
     font-size: 1em;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    min-width: 0;
 }
 .service-card-status {
     font-size: 0.8em;

@@ -17,12 +17,12 @@
         <nav class="sidebar">
             <div class="logo">WinOperation</div>
             <ul class="nav-menu">
-                <li class="nav-item active" data-panel="dashboard">概览</li>
-                <li class="nav-item" data-panel="system-info">系统信息</li>
-                <li class="nav-item" data-panel="cleanup">系统清理</li>
-                <li class="nav-item" data-panel="performance">性能调优</li>
+                <li class="nav-item active" data-panel="dashboard">仪表盘</li>
+                <li class="nav-item" data-panel="system-info">系统详情</li>
+                <li class="nav-item" data-panel="cleanup">存储清理</li>
+                <li class="nav-item" data-panel="performance">服务管理</li>
                 <li class="nav-item" data-panel="registry">注册表</li>
-                <li class="nav-item" data-panel="network">网络优化</li>
+                <li class="nav-item" data-panel="network">网络详情</li>
             </ul>
             <button class="theme-toggle" id="themeToggle" title="切换主题">
                 <span class="theme-icon sun">☀</span>
@@ -30,30 +30,31 @@
             </button>
         </nav>
         <main class="content">
-            <!-- 概览 -->
-            <section id="panel-dashboard" class="panel active">
-                <h2>系统概览</h2>
+            <div id="loading-bar" class="loading-bar"><div class="loading-bar-thumb"></div></div>
+            <!-- 仪表盘 -->
+            <section id="panel-dashboard" class="panel">
+                <h2>系统总览</h2>
                 <div class="cards" id="dashboard-cards"></div>
             </section>
 
-            <!-- 系统信息 -->
+            <!-- 系统详情 -->
             <section id="panel-system-info" class="panel">
-                <h2>系统信息</h2>
+                <h2>系统详情</h2>
                 <div id="system-info-content"></div>
             </section>
 
-            <!-- 系统清理 -->
+            <!-- 存储清理 -->
             <section id="panel-cleanup" class="panel">
-                <h2>系统清理</h2>
+                <h2>存储清理</h2>
                 <div class="cleanup-actions glass">
-                    <button class="btn btn-primary" onclick="doScanCleanup()">扫描可清理项</button>
+                    <button class="btn btn-primary" onclick="doScanCleanup()">重新扫描</button>
                     <button class="btn btn-danger" onclick="doCleanupSelected()" id="cleanup-execute-btn" disabled>清理选中项</button>
                 </div>
                 <div id="cleanup-categories" class="cleanup-categories glass"></div>
                 <div id="cleanup-result" class="result-area"></div>
             </section>
 
-            <!-- 性能调优 -->
+            <!-- 服务管理 -->
             <section id="panel-performance" class="panel">
                 <h2>服务管理</h2>
                 <div id="performance-content"></div>
@@ -101,24 +102,20 @@
                 <div id="registry-result" class="result-area"></div>
             </section>
 
-            <!-- 网络优化 -->
+            <!-- 网络详情 -->
             <section id="panel-network" class="panel">
-                <h2>网络信息</h2>
+                <h2>网络详情</h2>
                 <div id="network-content"></div>
             </section>
         </main>
     </div>
-    <script src="/js/api.js"></script>
-    <script src="/js/theme.js"></script>
-    <script src="/js/navigation.js"></script>
     <script src="/js/dashboard.js"></script>
     <script src="/js/system-info.js"></script>
     <script src="/js/cleanup.js"></script>
     <script src="/js/performance.js"></script>
     <script src="/js/registry.js"></script>
     <script src="/js/network.js"></script>
-    <script src="/js/main.js"></script>
-    <script src="/animation/config.js"></script>
     <script src="/animation/animations.js"></script>
+    <script src="/js/app.js"></script>
 </body>
 </html>

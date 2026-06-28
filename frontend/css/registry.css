@@ -27,7 +27,6 @@
     font-family: inherit;
     font-size: 0.9em;
     outline: none;
-    transition: all var(--transition-fast);
 }
 .reg-sidebar .form-group input {
     flex: 1;
@@ -41,6 +40,7 @@
     margin-top: 8px;
     max-height: calc(100vh - 200px);
     overflow-y: auto;
+    padding-right: 4px;
 }
 .reg-tree::-webkit-scrollbar {
     width: 6px;
@@ -66,7 +66,6 @@
     overflow: hidden;
     text-overflow: ellipsis;
     font-family: "Cascadia Code", "Fira Code", Consolas, monospace;
-    transition: all var(--transition-fast);
     position: relative;
     border-left: 2px solid transparent;
 }
@@ -88,10 +87,8 @@
     margin-right: 2px;
     font-size: 0.7em;
     color: var(--text-tertiary);
-    transition: transform var(--transition-fast);
 }
 .reg-tree-name {
-    transition: color var(--transition-fast);
 }
 .reg-tree-wrapper.collapsed > .children {
     display: none;
@@ -145,7 +142,6 @@
     font-family: inherit;
     font-size: 0.9em;
     outline: none;
-    transition: all var(--transition-fast);
     appearance: none;
     -webkit-appearance: none;
 }
@@ -184,7 +180,6 @@
     background: transparent;
     color: var(--text-secondary);
     cursor: pointer;
-    transition: all var(--transition-fast);
     font-family: inherit;
 }
 .reg-actions .btn-copy:hover {
@@ -223,55 +218,3 @@
     color: white;
 }
 
-[data-theme="dark"] .reg-sidebar,
-[data-theme="dark"] .reg-toolbar,
-[data-theme="dark"] .reg-path-display,
-[data-theme="dark"] .reg-write-form {
-    background: #2D2D2D;
-    border-color: rgba(255, 255, 255, 0.15);
-}
-[data-theme="dark"] .reg-tree-node {
-    color: #C5C5C5;
-}
-[data-theme="dark"] .reg-tree-node:hover,
-[data-theme="dark"] .reg-tree-node.active {
-    background: rgba(0, 120, 212, 0.15);
-    color: #1A86D9;
-}
-[data-theme="dark"] .reg-value-data {
-    color: #FFFFFF;
-}
-[data-theme="dark"] .reg-actions button {
-    background: #2D2D2D;
-    color: #C5C5C5;
-    border-color: rgba(255, 255, 255, 0.2);
-}
-[data-theme="dark"] .reg-sidebar input {
-    background: #2D2D2D;
-    color: #FFFFFF;
-    border-color: rgba(255, 255, 255, 0.2);
-}
-[data-theme="dark"] .reg-sidebar input:focus {
-    border-color: #1A86D9;
-}
-[data-theme="dark"] .reg-write-form input,
-[data-theme="dark"] .reg-write-form select {
-    background: #2D2D2D;
-    color: #FFFFFF;
-    border-color: rgba(255, 255, 255, 0.2);
-}
-[data-theme="dark"] table {
-    border-color: rgba(255, 255, 255, 0.15);
-}
-[data-theme="dark"] th,
-[data-theme="dark"] td {
-    background: #2D2D2D;
-    color: #C5C5C5;
-    border-bottom-color: rgba(255, 255, 255, 0.1);
-}
-[data-theme="dark"] th {
-    color: #1A86D9;
-}
-[data-theme="dark"] .empty-hint {
-    color: #9E9E9E;
-}

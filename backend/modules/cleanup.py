@@ -83,8 +83,6 @@ CATEGORIES = [
     },
 ]
 
-_CATEGORY_BY_ID = {c["id"]: c for c in CATEGORIES}
-
 
 def _browser_cache_paths():
     paths = list(CATEGORIES[1]["paths"])
@@ -195,7 +193,7 @@ def execute_cleanup(category_ids):
     total_freed_bytes = [0]
 
     for cat_id in category_ids:
-        cat = _CATEGORY_BY_ID.get(cat_id)
+        cat = next((c for c in CATEGORIES if c["id"] == cat_id), None)
         if cat is None:
             continue
 

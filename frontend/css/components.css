@@ -22,13 +22,8 @@ h3 {
 .card {
     padding: 24px;
     border-radius: var(--radius-lg);
-    transition: all var(--transition-fast);
     background: var(--bg-layer1);
     border: 1px solid var(--border-standard);
-}
-
-.card:hover {
-    transform: translateY(-2px);
 }
 
 .card-title {
@@ -57,13 +52,9 @@ h3 {
     font-size: 0.9em;
     font-family: inherit;
     font-weight: 500;
-    transition: all var(--transition-fast);
     color: white;
     outline: none;
 }
-
-.btn:hover { transform: translateY(-1px); }
-.btn:active { transform: translateY(0); }
 
 .btn-primary {
     background: var(--accent);
@@ -120,7 +111,6 @@ h3 {
     font-family: inherit;
     font-size: 0.9em;
     outline: none;
-    transition: all var(--transition-fast);
 }
 
 .form-group input:focus {

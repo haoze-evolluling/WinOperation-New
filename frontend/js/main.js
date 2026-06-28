@@ -1,3 +1,0 @@
-if (!restoreNavigation()) {
-    activatePanel("dashboard");
-}

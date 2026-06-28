@@ -12,6 +12,14 @@ _ABBREV_TO_FULL = {
 }
 _ROOT_TO_ABBREV = {v: k for k, v in _ABBREV_TO_FULL.items()}
 
+_ROOT_MAP = {
+    "HKEY_LOCAL_MACHINE": win32con.HKEY_LOCAL_MACHINE,
+    "HKEY_CURRENT_USER": win32con.HKEY_CURRENT_USER,
+    "HKEY_CLASSES_ROOT": win32con.HKEY_CLASSES_ROOT,
+    "HKEY_USERS": win32con.HKEY_USERS,
+    "HKEY_CURRENT_CONFIG": win32con.HKEY_CURRENT_CONFIG,
+}
+
 TYPE_MAP = {
     win32con.REG_SZ: "REG_SZ",
     win32con.REG_DWORD: "REG_DWORD",
@@ -25,18 +33,18 @@ def _parse_root(reg_path):
     parts = reg_path.split("\\", 1)
     root_str = parts[0].upper()
     sub_path = parts[1] if len(parts) > 1 else ""
-    root = _ABBREV_TO_FULL.get(root_str)
-    if root is None:
+    root_name = _ABBREV_TO_FULL.get(root_str)
+    if root_name is None:
         raise ValueError(f"不支持的注册表根: {root_str}")
-    # map full name back to win32 constant
-    root_map = {
-        "HKEY_LOCAL_MACHINE": win32con.HKEY_LOCAL_MACHINE,
-        "HKEY_CURRENT_USER": win32con.HKEY_CURRENT_USER,
-        "HKEY_CLASSES_ROOT": win32con.HKEY_CLASSES_ROOT,
-        "HKEY_USERS": win32con.HKEY_USERS,
-        "HKEY_CURRENT_CONFIG": win32con.HKEY_CURRENT_CONFIG,
-    }
-    return root_map[root], sub_path
+    return _ROOT_MAP[root_name], sub_path
+
+
+def _abbrev_and_sub(reg_path):
+    parts = reg_path.split("\\", 1)
+    root_str = parts[0].upper()
+    rest = parts[1] if len(parts) > 1 else ""
+    root_name = _ABBREV_TO_FULL.get(root_str, root_str)
+    return root_name, rest
 
 
 def read_key(reg_path, value_name=""):
@@ -136,10 +144,7 @@ def export_reg(reg_path):
 
 
 def _reg_path_to_string(reg_path):
-    parts = reg_path.split("\\", 1)
-    root_str = parts[0].upper()
-    rest = parts[1] if len(parts) > 1 else ""
-    root_name = _ABBREV_TO_FULL.get(root_str, root_str)
+    root_name, rest = _abbrev_and_sub(reg_path)
     if rest:
         return f"{root_name}\\{rest}"
     return root_name
@@ -181,14 +186,12 @@ def import_reg(reg_text):
         section_match = re.match(r'^\[(.+)\]$', line)
         if section_match:
             full_path = section_match.group(1)
-            parts = full_path.split("\\", 1)
-            root_str = parts[0].upper()
-            abbrev = _ROOT_TO_ABBREV.get(root_str)
+            root_name, rest = _abbrev_and_sub(full_path)
+            abbrev = _ROOT_TO_ABBREV.get(root_name)
             if abbrev is None:
-                errors.append(f"不支持的注册表根: {root_str}")
+                errors.append(f"不支持的注册表根: {root_name}")
                 current_path = None
                 continue
-            rest = parts[1] if len(parts) > 1 else ""
             current_path = f"{abbrev}\\{rest}" if rest else abbrev
             continue
 

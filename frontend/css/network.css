@@ -1,0 +1,15 @@
+.extra-ips {
+    font-size: 0.8em;
+    color: var(--text-tertiary);
+    margin-top: 6px;
+    word-break: break-all;
+    line-height: 1.4;
+}
+.span-2 {
+    grid-column: span 2;
+}
+@media (max-width: 600px) {
+    .span-2 {
+        grid-column: span 1;
+    }
+}

@@ -1,3 +1,7 @@
+async function loadCleanup() {
+    await doScanCleanup();
+}
+
 async function doScanCleanup() {
     const result = await api("/api/cleanup/scan", { method: "POST", body: JSON.stringify({}) });
     const container = document.getElementById("cleanup-result");

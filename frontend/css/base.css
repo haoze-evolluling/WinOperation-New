@@ -11,7 +11,6 @@ body {
     color: var(--text-primary);
     position: relative;
     overflow-x: hidden;
-    transition: background var(--transition-normal), color var(--transition-normal);
     line-height: 1.5;
     -webkit-font-smoothing: antialiased;
 }
@@ -29,7 +28,6 @@ body {
     top: 0;
     height: 100vh;
     z-index: 10;
-    transition: background var(--transition-normal), border-color var(--transition-normal);
 }
 
 .logo {
@@ -47,7 +45,6 @@ body {
     cursor: pointer;
     border-radius: var(--radius-md);
     margin-bottom: 2px;
-    transition: all var(--transition-fast);
     color: var(--text-secondary);
     font-size: 0.95em;
     font-weight: 400;
@@ -78,7 +75,6 @@ body {
     gap: 8px;
     color: var(--text-secondary);
     font-size: 1.1em;
-    transition: all var(--transition-fast);
     width: 100%;
 }
 
@@ -97,16 +93,40 @@ body {
     padding: 32px 40px;
     overflow-y: auto;
     max-height: 100vh;
+    position: relative;
 }
 
 .panel {
     display: none;
-    animation: fadeIn 0.25s ease;
 }
-
 .panel.active { display: block; }
 
-@keyframes fadeIn {
-    from { opacity: 0; transform: translateY(6px); }
-    to { opacity: 1; transform: translateY(0); }
+.loading-bar {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    width: 200px;
+    height: 4px;
+    background: var(--bg-layer1);
+    border: 1px solid var(--border-standard);
+    border-radius: 2px;
+    z-index: 100;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    overflow: hidden;
+}
+.loading-bar.active {
+    opacity: 1;
+}
+.loading-bar.done {
+    opacity: 0;
+}
+.loading-bar-thumb {
+    width: 0%;
+    height: 100%;
+    background: var(--accent);
+    border-radius: 2px;
+    box-shadow: 0 0 8px var(--accent);
 }

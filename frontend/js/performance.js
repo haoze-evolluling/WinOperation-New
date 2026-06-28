@@ -9,7 +9,7 @@ async function loadPerformance() {
         card.className = "service-card glass";
         card.innerHTML = `
             <div class="service-card-header">
-                <span class="service-card-name">${s.name}</span>
+                <span class="service-card-name" title="${s.name}">${s.name}</span>
                 <span class="service-card-status">${s.status}</span>
             </div>
             <div class="service-card-meta">${s.display_name}</div>
