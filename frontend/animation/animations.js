@@ -6,9 +6,6 @@
     pressScale: 0.94,
     pressEasing: "cubic-bezier(0.34, 1.56, 0.64, 1)",
     pressDuration: 300,
-    entranceEasing: "cubic-bezier(0.4, 0, 0.2, 1)",
-    entranceDuration: 400,
-    entranceStagger: 50,
   };
 
   const cfg = { ...DEFAULTS, ...ANIM_CONFIG };
@@ -46,17 +43,6 @@
       }
       .anim-press.reg-actions button {
         transform: scale(0.94);
-      }
-
-      .anim-enter {
-        opacity: 0;
-        transform: translateY(12px);
-        transition: opacity ${cfg.entranceDuration}ms ${cfg.entranceEasing},
-                    transform ${cfg.entranceDuration}ms ${cfg.entranceEasing};
-      }
-      .anim-enter.visible {
-        opacity: 1;
-        transform: translateY(0);
       }
     `;
     document.head.appendChild(style);
@@ -105,23 +91,6 @@
       document.querySelectorAll(".anim-press").forEach((el) => {
         el.classList.remove("anim-press");
       });
-    }
-
-    animateEntrance(container) {
-      if (prefersReducedMotion()) return;
-      if (!container) return;
-
-      const elements = container.querySelectorAll(this.combinedSelector);
-      elements.forEach((el, index) => {
-        el.classList.add("anim-enter");
-        setTimeout(() => {
-          el.classList.add("visible");
-        }, index * cfg.entranceStagger);
-      });
-
-      setTimeout(() => {
-        elements.forEach((el) => el.classList.remove("anim-enter"));
-      }, elements.length * cfg.entranceStagger + cfg.entranceDuration);
     }
 
     destroy() {

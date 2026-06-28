@@ -5,9 +5,6 @@ async function activatePanel(panelName) {
     const panel = document.getElementById("panel-" + panelName);
     if (panel) panel.classList.add("active");
     await loadPanel(panelName);
-    if (window.animationsEngine) {
-        window.animationsEngine.animateEntrance(panel);
-    }
 }
 
 function restoreNavigation() {
