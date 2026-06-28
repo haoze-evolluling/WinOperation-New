@@ -52,10 +52,21 @@
     document.head.appendChild(style);
   }
 
+  function buildCombinedSelector(selectors) {
+    return Object.values(selectors).join(", ");
+  }
+
   class AnimationsEngine {
     constructor() {
       this.selectors = cfg.selectors || {};
-      this.boundHandlers = [];
+      this.combinedSelector = buildCombinedSelector(this.selectors);
+      this.currentHover = null;
+      this.handlers = {
+        mouseover: this.onMouseOver.bind(this),
+        mouseout: this.onMouseOut.bind(this),
+        mousedown: this.onMouseDown.bind(this),
+        mouseup: this.onMouseUp.bind(this),
+      };
     }
 
     init() {
@@ -63,37 +74,66 @@
         console.log("[AnimationsEngine] Reduced motion preferred — animations disabled.");
         return;
       }
+      if (!this.combinedSelector) return;
+
       injectStyles();
-      Object.entries(this.selectors).forEach(([, sel]) => {
-        document.querySelectorAll(sel).forEach((el) => this.attach(el));
-      });
+
+      document.addEventListener("mouseover", this.handlers.mouseover);
+      document.addEventListener("mouseout", this.handlers.mouseout);
+      document.addEventListener("mousedown", this.handlers.mousedown);
+      document.addEventListener("mouseup", this.handlers.mouseup);
     }
 
-    attach(el) {
-      const onEnter = () => el.classList.add("anim-lift");
-      const onLeave = () => { el.classList.remove("anim-lift"); el.classList.remove("anim-press"); };
-      const onDown = () => { el.classList.add("anim-press"); el.classList.remove("anim-lift"); };
-      const onUp = () => { el.classList.remove("anim-press"); };
+    findAnimatedElement(target) {
+      if (!target) return null;
+      return target.closest(this.combinedSelector);
+    }
 
-      el.addEventListener("mouseenter", onEnter);
-      el.addEventListener("mouseleave", onLeave);
-      el.addEventListener("mousedown", onDown);
-      el.addEventListener("mouseup", onUp);
-      el.addEventListener("mouseleave", onLeave);
+    onMouseOver(e) {
+      const el = this.findAnimatedElement(e.target);
+      if (el && el !== this.currentHover) {
+        if (this.currentHover) {
+          this.currentHover.classList.remove("anim-lift");
+        }
+        el.classList.add("anim-lift");
+        this.currentHover = el;
+      }
+    }
 
-      this.boundHandlers.push({ el, onEnter, onLeave, onDown, onUp });
+    onMouseOut(e) {
+      const el = this.findAnimatedElement(e.target);
+      if (el && el === this.currentHover && !el.contains(e.relatedTarget)) {
+        el.classList.remove("anim-lift");
+        this.currentHover = null;
+      }
+    }
+
+    onMouseDown(e) {
+      const el = this.findAnimatedElement(e.target);
+      if (el) {
+        el.classList.add("anim-press");
+        el.classList.remove("anim-lift");
+      }
+    }
+
+    onMouseUp() {
+      if (this.currentHover) {
+        this.currentHover.classList.remove("anim-press");
+      }
     }
 
     destroy() {
-      this.boundHandlers.forEach(({ el, onEnter, onLeave, onDown, onUp }) => {
-        el.removeEventListener("mouseenter", onEnter);
-        el.removeEventListener("mouseleave", onLeave);
-        el.removeEventListener("mousedown", onDown);
-        el.removeEventListener("mouseup", onUp);
-      });
+      document.removeEventListener("mouseover", this.handlers.mouseover);
+      document.removeEventListener("mouseout", this.handlers.mouseout);
+      document.removeEventListener("mousedown", this.handlers.mousedown);
+      document.removeEventListener("mouseup", this.handlers.mouseup);
+      if (this.currentHover) {
+        this.currentHover.classList.remove("anim-lift");
+        this.currentHover.classList.remove("anim-press");
+        this.currentHover = null;
+      }
       const style = document.getElementById("animations-injected");
       if (style) style.remove();
-      this.boundHandlers = [];
     }
   }
 
