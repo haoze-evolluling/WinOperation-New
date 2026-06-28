@@ -138,4 +138,6 @@
   }
 
   window.AnimationsEngine = AnimationsEngine;
+  window.animationsEngine = new AnimationsEngine();
+  window.animationsEngine.init();
 })();
