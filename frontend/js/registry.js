@@ -10,42 +10,68 @@ async function loadRegTree() {
     renderRegTree(tree.children, 0, basePath, container);
 }
 
+function toggleRegSidebar() {
+    const sidebar = document.getElementById("reg-sidebar");
+    if (sidebar) {
+        sidebar.style.display = sidebar.style.display === "none" ? "" : "none";
+    }
+}
+
+const ROOT_KEYS = ["HKCU", "HKLM", "HKCR", "HKU", "HKCC", "HKPD"];
+
+function goUpRegTree() {
+    const pathInput = document.getElementById("reg-tree-path");
+    if (!pathInput) return;
+    const parts = pathInput.value.trim().split("\\").filter(Boolean);
+    if (parts.length <= 1) return;
+    parts.pop();
+    pathInput.value = parts.join("\\");
+    loadRegTree();
+}
+
 function renderRegTree(tree, depth, parentPath, container) {
     tree.forEach(node => {
         const wrapper = document.createElement("div");
         wrapper.className = "reg-tree-wrapper";
         const hasChildren = node.children && node.children.length > 0;
+
         const nodeDiv = document.createElement("div");
         nodeDiv.className = "reg-tree-node glass";
-        nodeDiv.style.paddingLeft = `${depth * 20 + (hasChildren ? 4 : 4)}px`;
+        nodeDiv.style.paddingLeft = `${depth * 20 + 10}px`;
         nodeDiv.title = node.path || parentPath + "\\" + node.name;
+
         const toggle = document.createElement("span");
         toggle.className = "toggle";
-        toggle.textContent = hasChildren ? "▼" : "•";
+        toggle.textContent = hasChildren ? "▼" : "";
         nodeDiv.appendChild(toggle);
+
         const text = document.createElement("span");
         text.className = "reg-tree-name";
         text.textContent = node.name;
         nodeDiv.appendChild(text);
-        if (hasChildren) {
-            nodeDiv.addEventListener("click", (e) => {
-                if (e.target === toggle || e.target === text) {
-                    wrapper.classList.toggle("collapsed");
-                    e.stopImmediatePropagation();
-                }
-            });
-        }
-        nodeDiv.addEventListener("click", () => {
+
+        nodeDiv.addEventListener("click", (e) => {
+            // Click on toggle: collapse/expand only, don't select
+            if (e.target === toggle) {
+                wrapper.classList.toggle("collapsed");
+                return;
+            }
+            // Select node
             document.getElementById("reg-tree").querySelectorAll(".reg-tree-node").forEach(n => n.classList.remove("active"));
             nodeDiv.classList.add("active");
+            // Sync sidebar input with selected path
+            const pathInput = document.getElementById("reg-tree-path");
+            if (pathInput) pathInput.value = node.path || parentPath + "\\" + node.name;
             loadRegValues(node.path || parentPath + "\\" + node.name);
         });
+
         nodeDiv.addEventListener("contextmenu", (e) => {
             e.preventDefault();
             if (confirm(`删除注册表项 "${node.path || parentPath + "\\" + node.name}" 及其所有子项？`)) {
                 deleteRegKey(node.path || parentPath + "\\" + node.name);
             }
         });
+
         wrapper.appendChild(nodeDiv);
         if (hasChildren) {
             const childContainer = document.createElement("div");
@@ -59,9 +85,14 @@ function renderRegTree(tree, depth, parentPath, container) {
 
 async function loadRegValues(path) {
     window._currentRegPath = path;
-    document.getElementById("reg-path-display").textContent = path;
-    const data = await api(`/api/registry/list/${encodeURIComponent(path)}`);
+    const pathDisplay = document.getElementById("reg-path-display");
+    if (pathDisplay) pathDisplay.textContent = path;
+
     const tbody = document.getElementById("reg-values-body");
+    // Show loading state
+    tbody.innerHTML = `<tr><td colspan="4" class="empty-hint">加载中...</td></tr>`;
+
+    const data = await api(`/api/registry/list/${encodeURIComponent(path)}`);
     if (data.status !== "ok") { tbody.innerHTML = `<tr><td colspan="4">加载失败</td></tr>`; return; }
     if (data.data.status === "error") { tbody.innerHTML = `<tr><td colspan="4">${data.data.error}</td></tr>`; return; }
     tbody.innerHTML = "";
@@ -71,13 +102,17 @@ async function loadRegValues(path) {
     }
     (data.data.values || []).forEach(item => {
         const tr = document.createElement("tr");
+        const dataStr = String(item.data ?? "");
+        const nameEsc = String(item.name).replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        const dataEsc = dataStr.replace(/&/g, "&amp;").replace(/</g, "&lt;").replace(/>/g, "&gt;").replace(/"/g, "&quot;");
+        const nameJs = item.name.replace(/'/g, "\\'");
         tr.innerHTML = `
-            <td>${item.name}</td>
+            <td>${nameEsc}</td>
             <td><span class="reg-type-badge">${item.type}</span></td>
-            <td class="reg-value-data">${item.data}</td>
+            <td class="reg-value-data">${dataEsc}</td>
             <td class="reg-actions">
-                <button class="btn-copy" onclick="copyRegValue('${item.data.replace(/'/g, "\\'")}')" title="复制">复制</button>
-                <button class="btn-del" onclick="deleteRegValue('${item.name.replace(/'/g, "\\'")}')" title="删除">删除</button>
+                <button class="btn-copy" onclick="copyRegValue('${dataStr.replace(/'/g, "\\'")}')" title="复制">复制</button>
+                <button class="btn-del" onclick="deleteRegValue('${nameJs}')" title="删除">删除</button>
             </td>
         `;
         tbody.appendChild(tr);
@@ -113,7 +148,8 @@ async function deleteRegKey(path) {
     if (result.status === "ok") {
         showToast("删除成功");
         window._currentRegPath = "";
-        document.getElementById("reg-path-display").textContent = path.split("\\")[0];
+        const pathDisplay = document.getElementById("reg-path-display");
+        if (pathDisplay) pathDisplay.textContent = path.split("\\")[0];
         loadRegTree();
     } else {
         showToast(result.error || "删除失败", "error");
@@ -139,10 +175,23 @@ function refreshRegValues() {
 
 function showRegWriteForm() {
     document.getElementById("reg-write-form").style.display = "flex";
+    updateWriteFormHint();
 }
 
 function hideRegWriteForm() {
     document.getElementById("reg-write-form").style.display = "none";
+}
+
+function updateWriteFormHint() {
+    const type = document.getElementById("reg-write-type");
+    const valueInput = document.getElementById("reg-write-value");
+    if (!type || !valueInput) return;
+    const hints = {
+        "REG_SZ": "字符串",
+        "REG_DWORD": "十进制整数 (如 1)",
+        "REG_BINARY": "十六进制 (如 0xFF)",
+    };
+    valueInput.placeholder = hints[type.value] || "值";
 }
 
 async function writeReg() {
@@ -151,6 +200,7 @@ async function writeReg() {
     const type = document.getElementById("reg-write-type").value;
     const value = document.getElementById("reg-write-value").value;
     if (!key) { alert("请输入键名"); return; }
+    if (!value) { alert("请输入值"); return; }
     const result = await api(`/api/registry/write/${encodeURIComponent(path)}`, {
         method: "POST",
         body: JSON.stringify({ key, value, type }),

@@ -13,7 +13,6 @@
     <link rel="stylesheet" href="/css/registry.css">
     <link rel="stylesheet" href="/css/cleanup.css">
     <link rel="stylesheet" href="/css/performance.css">
-    <link rel="stylesheet" href="/css/network.css">
 </head>
 <body>
     <div class="container">
@@ -25,7 +24,6 @@
                 <li class="nav-item" data-panel="cleanup">存储清理</li>
                 <li class="nav-item" data-panel="performance">服务管理</li>
                 <li class="nav-item" data-panel="registry">注册表</li>
-                <li class="nav-item" data-panel="network">网络详情</li>
             </ul>
             <button class="theme-toggle" id="themeToggle" title="切换主题" aria-label="切换主题">
                 <span class="theme-icon sun">
@@ -52,8 +50,8 @@
             <div id="loading-bar" class="loading-bar"><div class="loading-bar-thumb"></div></div>
             <!-- 仪表盘 -->
             <section id="panel-dashboard" class="panel">
-                <h2>系统总览</h2>
-                <div class="cards" id="dashboard-cards"></div>
+                <h2>仪表盘</h2>
+                <div id="dashboard-content"></div>
             </section>
 
             <!-- 系统详情 -->
@@ -83,11 +81,13 @@
             <!-- 注册表 -->
             <section id="panel-registry" class="panel">
                 <h2>注册表操作</h2>
+                <button class="reg-sidebar-toggle" onclick="toggleRegSidebar()">切换目录树</button>
                 <div class="reg-layout">
-                    <div class="reg-sidebar glass">
+                    <div class="reg-sidebar glass" id="reg-sidebar">
                         <div class="reg-sidebar-label">注册表目录</div>
                         <div class="form-group">
                             <input type="text" id="reg-tree-path" placeholder="路径 (如 HKCU\Software)" value="HKCU">
+                            <button class="btn btn-secondary btn-sm" onclick="goUpRegTree()" title="返回上一级">&#8593;</button>
                             <button class="btn btn-secondary btn-sm" onclick="loadRegTree()">加载</button>
                         </div>
                         <div id="reg-tree" class="reg-tree"></div>
@@ -101,13 +101,15 @@
                             <input type="file" id="reg-import-file" accept=".reg" style="display:none" onchange="doImportReg(event)">
                         </div>
                         <div id="reg-path-display" class="reg-path-display glass">HKCU</div>
+                        <div class="table-scroll">
                         <table class="table">
                             <thead><tr><th>名称</th><th>类型</th><th>数据</th><th>操作</th></tr></thead>
                             <tbody id="reg-values-body"></tbody>
                         </table>
+                        </div>
                         <div id="reg-write-form" class="reg-write-form glass" style="display:none">
                             <input type="text" id="reg-write-key" placeholder="键名">
-                            <select id="reg-write-type">
+                            <select id="reg-write-type" onchange="updateWriteFormHint()">
                                 <option value="REG_SZ">REG_SZ</option>
                                 <option value="REG_DWORD">REG_DWORD</option>
                                 <option value="REG_BINARY">REG_BINARY</option>
@@ -120,12 +122,6 @@
                 </div>
                 <div id="registry-result" class="result-area"></div>
             </section>
-
-            <!-- 网络详情 -->
-            <section id="panel-network" class="panel">
-                <h2>网络详情</h2>
-                <div id="network-content"></div>
-            </section>
         </main>
     </div>
     <script src="/js/dashboard.js"></script>
@@ -133,7 +129,6 @@
     <script src="/js/cleanup.js"></script>
     <script src="/js/performance.js"></script>
     <script src="/js/registry.js"></script>
-    <script src="/js/network.js"></script>
     <script src="/animation/animations.js"></script>
     <script src="/js/app.js"></script>
 </body>

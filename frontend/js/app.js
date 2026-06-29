@@ -23,7 +23,8 @@ document.getElementById("themeToggle").addEventListener("click", () => {
 });
 
 function animateProgress(thumb, from, to, duration) {
-    return new Promise(resolve => {
+    const handle = {};
+    const p = new Promise(resolve => {
         let cancelled = false;
         let rafId;
         const tick = (now) => {
@@ -40,11 +41,13 @@ function animateProgress(thumb, from, to, duration) {
         };
         const startTime = performance.now();
         rafId = requestAnimationFrame(tick);
-        resolve._cancel = () => {
+        handle._cancel = () => {
             cancelled = true;
             if (rafId) cancelAnimationFrame(rafId);
         };
     });
+    p._cancel = handle._cancel;
+    return p;
 }
 
 async function activatePanel(panelName) {
@@ -126,7 +129,6 @@ async function loadPanel(panel) {
         case "system-info": await loadSystemInfo(); break;
         case "cleanup": await loadCleanup(); break;
         case "performance": await loadPerformance(); break;
-        case "network": await loadNetwork(); break;
         case "registry": await loadRegTree(); break;
     }
 }
