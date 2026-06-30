@@ -9,10 +9,12 @@ function getHealthLevel(pct) {
 }
 
 function getOverallStatus(cpu, mem, disk) {
-    const max = Math.max(cpu, mem, disk);
-    if (max < 50) return { label: "系统运行正常", color: "#0F7B0F", bg: "rgba(15,123,15,0.06)" };
-    if (max < 80) return { label: "部分资源使用率较高", color: "#CA5010", bg: "rgba(202,80,16,0.06)" };
-    return { label: "系统负载较高，建议关注", color: "#D13438", bg: "rgba(209,52,56,0.06)" };
+    const cpuLevel = getHealthLevel(cpu);
+    const memLevel = getHealthLevel(mem);
+    const diskLevel = getHealthLevel(disk);
+    const maxLevel = [cpuLevel, memLevel, diskLevel].sort((a, b) => b.threshold - a.threshold)[0];
+    const labels = { "正常": "系统运行正常", "较高": "部分资源使用率较高", "高负载": "系统负载较高，建议关注" };
+    return { label: labels[maxLevel.label], color: maxLevel.color, bg: maxLevel.bg };
 }
 
 async function loadDashboard() {

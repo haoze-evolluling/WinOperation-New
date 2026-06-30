@@ -1,4 +1,4 @@
-from flask import Flask, jsonify, request, send_from_directory, Response
+from flask import Flask, request, send_from_directory, Response
 import ctypes
 import os
 import sys
