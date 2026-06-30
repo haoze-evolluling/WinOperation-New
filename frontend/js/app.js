@@ -126,7 +126,6 @@ document.querySelectorAll(".nav-item").forEach(item => {
 async function loadPanel(panel) {
     switch (panel) {
         case "dashboard": await loadDashboard(); break;
-        case "system-info": await loadSystemInfo(); break;
         case "cleanup": await loadCleanup(); break;
         case "performance": await loadPerformance(); break;
         case "registry": await loadRegTree(); break;

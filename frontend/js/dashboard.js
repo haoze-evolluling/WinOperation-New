@@ -17,7 +17,9 @@ function getOverallStatus(cpu, mem, disk) {
 
 async function loadDashboard() {
     const container = document.getElementById("dashboard-content");
+    const sysContainer = document.getElementById("system-info-content");
     container.innerHTML = '<p style="color:var(--text-tertiary)">加载中...</p>';
+    sysContainer.innerHTML = '<p style="color:var(--text-tertiary)">加载中...</p>';
     try {
         const [sysData, svcData, netData] = await Promise.all([
             api("/api/system-info"),
@@ -50,7 +52,7 @@ async function loadDashboard() {
         // Health summary banner
         html += `<div class="health-banner" style="background:${overall.bg};border:1px solid ${overall.color}22;color:${overall.color}">`;
         html += `<div class="health-banner-label">${overall.label}</div>`;
-        html += `<div class="health-banner-detail">CPU ${cpuLevel.label} · 内存 ${memLevel.label} · 磁盘 ${diskLevel.label}</div>`;
+        html += `<div class="health-banner-detail"><span>CPU ${cpuLevel.label}</span><span class="banner-sep">·</span><span>内存 ${memLevel.label}</span><span class="banner-sep">·</span><span>磁盘 ${diskLevel.label}</span></div>`;
         html += "</div>";
 
         // Health metrics
@@ -73,7 +75,7 @@ async function loadDashboard() {
 
         // Network adapters
         if (adapters.length > 0) {
-            html += '<div class="dash-section-title" style="margin-top:40px">网络适配器</div>';
+            html += '<div class="dash-section-title">网络适配器</div>';
             html += '<div class="network-section">';
             adapters.forEach(a => {
                 const connClass = a.status === "已连接" ? "connected" : "disconnected";
@@ -108,6 +110,14 @@ async function loadDashboard() {
             });
             html += "</div>";
         }
+
+        // Per-disk breakdown (per-drive granularity, not duplicate of aggregate card)
+        let sysHtml = '<div class="disk-detail-section"><div class="dash-section-title">磁盘详情</div><div class="resource-card"><table><thead><tr><th>盘符</th><th>总容量</th><th>可用</th><th>使用率</th></tr></thead><tbody>';
+        d.disk.forEach(disk => {
+            sysHtml += '<tr><td>' + disk.drive + '</td><td>' + disk.total_gb + ' GB</td><td>' + disk.free_gb + ' GB</td><td>' + disk.percent + '%</td></tr>';
+        });
+        sysHtml += '</tbody></table></div></div>';
+        sysContainer.innerHTML = sysHtml;
 
         container.innerHTML = html;
 

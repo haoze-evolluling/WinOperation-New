@@ -224,8 +224,132 @@ p {
     line-height: 1.6;
 }
 
-#system-info-content > table {
-    margin-top: 16px;
+.disk-detail-section {
+    margin-top: 32px;
+}
+
+.banner-sep {
+    margin: 0 10px;
+    opacity: 0.5;
+    font-weight: 300;
+}
+
+/* Dashboard polish */
+.health-card {
+    padding: 20px 22px;
+    border-radius: var(--radius-lg);
+    background: var(--bg-layer1);
+    border: 1px solid var(--border-subtle);
+    box-shadow: var(--shadow-sm);
+    border-left: 3px solid var(--level-color);
+    transition: box-shadow var(--transition-normal);
+    position: relative;
+    overflow: hidden;
+}
+
+.health-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    height: 2px;
+    background: var(--level-color);
+    opacity: 0.3;
+}
+
+.health-bar-track {
+    height: 4px;
+    background: var(--bg-layer2);
+    border-radius: 2px;
+    overflow: hidden;
+}
+
+.health-bar-fill {
+    height: 100%;
+    border-radius: 2px;
+    background: var(--level-color);
+    transition: width 0.8s cubic-bezier(0.25, 0.8, 0.25, 1.2);
+}
+
+.health-level {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    padding: 3px 10px;
+    border-radius: 4px;
+    font-size: 0.72em;
+    font-weight: 600;
+    background: var(--level-bg);
+    color: var(--level-color);
+    letter-spacing: 0.02em;
+}
+
+.health-header {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    margin-bottom: 2px;
+}
+
+.health-name {
+    font-size: 0.8em;
+    font-weight: 500;
+    color: var(--text-secondary);
+}
+
+.health-value {
+    font-size: 1.6em;
+    font-weight: 700;
+    color: var(--level-color);
+    letter-spacing: -0.03em;
+    line-height: 1.2;
+}
+
+.health-sub {
+    font-size: 0.78em;
+    color: var(--text-tertiary);
+    margin-bottom: 12px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+.dash-section-title {
+    font-size: 0.72em;
+    font-weight: 700;
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    color: var(--text-tertiary);
+    margin: 32px 0 16px 4px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--border-subtle);
+}
+
+.resource-title {
+    font-size: 0.85em;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+    letter-spacing: -0.01em;
+}
+
+.resource-title:first-child {
+    margin-top: 0;
+}
+
+.resource-card p {
+    color: var(--text-secondary);
+    font-size: 0.88em;
+    line-height: 1.6;
+    margin: 0 0 4px;
+}
+
+.resource-card strong {
+    color: var(--text-primary);
+    font-weight: 600;
 }
 
 .resource-card {
@@ -234,26 +358,6 @@ p {
     background: var(--bg-layer1);
     border: 1px solid var(--border-subtle);
     box-shadow: var(--shadow-sm);
-}
-
-.resource-title {
-    font-size: 1.1em;
-    font-weight: 600;
-    margin-top: 20px;
-    color: var(--text-primary);
-}
-
-.resource-title:first-child {
-    margin-top: 0;
-}
-
-#system-info-content .resource-card > p {
-    margin: 8px 0 4px;
-    padding: 0;
-    border: none;
-    background: transparent;
-    border-radius: 0;
-    color: var(--text-secondary);
 }
 
 table {
@@ -309,14 +413,7 @@ tr:last-child td { border-bottom: none; }
     margin-left: 4px;
 }
 
-.dash-section-title {
-    font-size: 0.75em;
-    font-weight: 600;
-    text-transform: uppercase;
-    letter-spacing: 0.08em;
-    color: var(--text-tertiary);
-    margin: 0 0 16px 4px;
-}
+
 
 .health-metrics {
     display: grid;
@@ -324,110 +421,21 @@ tr:last-child td { border-bottom: none; }
     gap: 16px;
 }
 
-.health-card {
-    padding: 20px 22px;
-    border-radius: var(--radius-lg);
-    background: var(--bg-layer1);
-    border: 1px solid var(--border-subtle);
-    box-shadow: var(--shadow-sm);
-    border-left: 3px solid var(--level-color);
-    transition: box-shadow var(--transition-normal);
-}
 
-.health-card:hover {
-    box-shadow: var(--shadow-md);
-}
-
-.health-header {
-    display: flex;
-    align-items: baseline;
-    justify-content: space-between;
-    margin-bottom: 2px;
-}
-
-.health-name {
-    font-size: 0.8em;
-    font-weight: 500;
-    color: var(--text-secondary);
-}
-
-.health-value {
-    font-size: 1.6em;
-    font-weight: 700;
-    color: var(--level-color);
-    letter-spacing: -0.03em;
-    line-height: 1.2;
-}
-
-.health-sub {
-    font-size: 0.78em;
-    color: var(--text-tertiary);
-    margin-bottom: 12px;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-}
-
-.health-bar-track {
-    height: 5px;
-    background: var(--bg-layer2);
-    border-radius: 3px;
-    overflow: hidden;
-}
-
-.health-bar-fill {
-    height: 100%;
-    border-radius: 3px;
-    background: var(--level-color);
-    transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1);
-}
-
-.health-details {
-    display: flex;
-    gap: 16px;
-    margin-top: 10px;
-}
-
-.health-detail {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    font-size: 0.78em;
-    color: var(--text-tertiary);
-}
-
-.health-detail-label {
-    font-weight: 500;
-}
-
-.health-detail-value {
-    font-weight: 600;
-    color: var(--text-secondary);
-}
-
-.health-level {
-    display: inline-block;
-    margin-top: 10px;
-    padding: 2px 8px;
-    border-radius: 3px;
-    font-size: 0.7em;
-    font-weight: 600;
-    background: var(--level-bg);
-    color: var(--level-color);
-}
-
-.network-section {
-    margin-top: 8px;
-}
-
+/* Network adapters */
 .adapter-card {
-    padding: 18px 22px;
+    padding: 20px 24px;
     border-radius: var(--radius-lg);
     background: var(--bg-layer1);
     border: 1px solid var(--border-subtle);
     box-shadow: var(--shadow-sm);
     margin-bottom: 12px;
     border-left: 3px solid var(--text-tertiary);
+    transition: border-color var(--transition-fast), box-shadow var(--transition-normal);
+}
+
+.adapter-card:hover {
+    box-shadow: var(--shadow-md);
 }
 
 .adapter-card.connected { border-left-color: var(--success); }
@@ -435,13 +443,14 @@ tr:last-child td { border-bottom: none; }
 
 .adapter-header {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     justify-content: space-between;
+    gap: 10px;
     margin-bottom: 10px;
 }
 
 .adapter-name {
-    font-size: 0.95em;
+    font-size: 0.92em;
     font-weight: 600;
     color: var(--text-primary);
 }
@@ -474,7 +483,7 @@ tr:last-child td { border-bottom: none; }
 }
 
 .adapter-primary-ip {
-    font-size: 1.2em;
+    font-size: 1.15em;
     font-weight: 700;
     color: var(--text-primary);
     letter-spacing: -0.02em;
@@ -485,7 +494,7 @@ tr:last-child td { border-bottom: none; }
 }
 
 .ip-tag {
-    font-size: 0.62em;
+    font-size: 0.6em;
     font-weight: 600;
     padding: 2px 6px;
     border-radius: 3px;
@@ -546,6 +555,9 @@ tr:last-child td { border-bottom: none; }
     padding: 2px 0;
 }
 
+.network-section {
+    margin-top: 32px;
+}
 @media (max-width: 1024px) {
     .health-metrics { grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); }
 }
@@ -555,4 +567,5 @@ tr:last-child td { border-bottom: none; }
     .adapter-grid { grid-template-columns: 1fr; }
     .health-banner { flex-direction: column; align-items: flex-start; gap: 4px; }
     .health-banner-detail { margin-left: 0; }
+    .banner-sep { display: none; }
 }
