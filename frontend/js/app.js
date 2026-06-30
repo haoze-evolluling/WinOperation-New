@@ -128,7 +128,6 @@ async function loadPanel(panel) {
         case "dashboard": await loadDashboard(); break;
         case "cleanup": await loadCleanup(); break;
         case "performance": await loadPerformance(); break;
-        case "registry": await loadRegTree(); break;
     }
 }
 
